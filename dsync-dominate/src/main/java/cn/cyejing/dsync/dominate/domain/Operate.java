@@ -1,14 +1,20 @@
 package cn.cyejing.dsync.dominate.domain;
 
 import io.netty.channel.Channel;
+import java.util.Objects;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @Description:
  * @Author: Born
  * @Create: 2018-10-27 13:29
  **/
-@Data
+@Getter
+@Setter
+@ToString
 public class Operate {
 
     private String operateId;
@@ -23,5 +29,25 @@ public class Operate {
         this.operateId = processId + "-" + lockId;
         this.resource = resource;
         this.channel = channel;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Operate operate = (Operate) o;
+        return processId == operate.processId &&
+                lockId == operate.lockId &&
+                Objects.equals(operateId, operate.operateId) &&
+                Objects.equals(resource, operate.resource);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(operateId, processId, lockId, resource);
     }
 }

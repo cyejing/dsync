@@ -2,6 +2,8 @@ package cn.cyejing.dsync.dominate.domain;
 
 import io.netty.channel.Channel;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import lombok.Data;
 
@@ -14,7 +16,7 @@ import lombok.Data;
 public class Process {
 
     private long processId;
-    private Set<String> resources = new HashSet<>();
+    private List<Operate> operates = new LinkedList<>();
     private Channel channel;
 
     public Process(Channel channel) {
@@ -22,7 +24,10 @@ public class Process {
         this.processId = ProcessCarrier.getInstance().createProcessId();
     }
 
-    public void addResource(String resource) {
-        resources.add(resource);
+    public void addOperate(Operate operate) {
+        operates.add(operate);
+    }
+    public void removeOperate(Operate operate){
+        operates.remove(operate);
     }
 }

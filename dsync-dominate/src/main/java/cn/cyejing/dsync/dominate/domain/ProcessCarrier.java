@@ -29,7 +29,7 @@ public class ProcessCarrier {
     }
 
     public void addProcess(Process process){
-        log.debug("add process to carrier:{}", process);
+        log.info("add process to carrier:{}", process);
         processIdMap.put(process.getProcessId(), process);
         processChannelMap.put(process.getChannel(), process);
     }
@@ -47,11 +47,23 @@ public class ProcessCarrier {
         return processChannelMap.get(channel);
     }
 
-    public void addProcessResource(Operate operate) {
+    public void addProcessOperate(Operate operate) {
         log.debug("add resource of operate:{}", operate);
-        Process process = processIdMap.get(operate.getProcessId());
-        if (process != null) {
-            process.addResource(operate.getResource());
+        if (operate != null) {
+            Process process = processIdMap.get(operate.getProcessId());
+            if (process != null) {
+                process.addOperate(operate);
+            }
+        }
+    }
+
+    public void removeProcessOperate(Operate operate) {
+        log.debug("remove resource of operate:{}", operate);
+        if (operate != null) {
+            Process process = processIdMap.get(operate.getProcessId());
+            if (process != null) {
+                process.removeOperate(operate);
+            }
         }
     }
 

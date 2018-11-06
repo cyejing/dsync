@@ -1,12 +1,15 @@
 package cn.cyejing.dsync.dominate.domain;
 
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
+import cn.cyejing.dsync.dominate.interceptor.LockInterceptor;
+import cn.cyejing.dsync.dominate.interceptor.ProcessPostLockInterceptor;
+import cn.cyejing.dsync.dominate.interceptor.TraceLockInterceptor;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,17 +22,24 @@ public class LockCarrier {
 
     private ConcurrentHashMap<String, Operate> lockMap = new ConcurrentHashMap<>();
 
-    private Map<String, Deque<Operate>> conditionOperator = new HashMap<>();
+    private ConcurrentHashMap<String, Queue<Operate>> conditionQueue = new ConcurrentHashMap<>();
+
+    private ProcessCarrier processCarrier = ProcessCarrier.getInstance();
+
+    private List<LockInterceptor> lockInterceptors = new ArrayList<>();
 
     private static final LockCarrier lockCarrier = new LockCarrier();
+
     private LockCarrier() {
+        addLockInterceptor(new ProcessPostLockInterceptor());
     }
 
     public static LockCarrier getInstance() {
         return lockCarrier;
     }
 
-    public synchronized boolean tryLock(String resource, Operate operate) {
+    public boolean tryLock(Operate operate) {
+        String resource = operate.getResource();
         log.debug("lock resource:{},operate:{}", resource, operate);
         Operate ifAbsent = lockMap.putIfAbsent(resource, operate);
         boolean lock = ifAbsent == null ? true : false;
@@ -37,63 +47,87 @@ public class LockCarrier {
             log.debug("lock resource:{} fail, push to deque. operate:{}", resource, operate);
             pushChannel(resource, operate);
         }
+        lockInterceptors.forEach(i -> i.lock(operate, lock));
         return lock;
     }
 
-    public synchronized Operate unLock(String resource) {
+    public Operate unLock(Operate operate) {
+        String resource = operate.getResource();
         log.debug("unlock resource:{}", resource);
-        Operate operator = popChannel(resource);
-        if (operator == null) {
-            lockMap.remove(resource);
-        }else{
-            lockMap.put(resource, operator);
-
+        Operate currentOperate = lockMap.get(resource);
+        if (!operate.equals(currentOperate)) {
+            log.error("unlock fail, because operate not current lock. current:{}, unlock:{}", currentOperate,
+                    operate);
+            return null;
         }
-        return operator;
+
+        Operate nextOperate = popChannel(resource);
+        Operate oldOperate;
+        if (nextOperate == null) {
+            oldOperate = lockMap.remove(resource);
+        } else {
+            oldOperate = lockMap.put(resource, nextOperate);
+        }
+        if (!currentOperate.equals(oldOperate)) {
+            log.error("###Error that should not happen!!!");
+        }
+        lockInterceptors.forEach(i -> i.unlock(oldOperate, nextOperate));
+        return nextOperate;
     }
 
-    public synchronized Set<Operate> processDown(Process process) {
-        log.debug("precess is down. process:{}",process);
-        Set<Operate> unLockSet = new HashSet<>();
-        Set<String> resources = process.getResources();
-        for (String resource : resources) {
-            Deque<Operate> operates = conditionOperator.get(resource);
-            if (operates != null) {
-                operates.removeIf(o -> o.getProcessId() == process.getProcessId());
-            }
-
-            Operate operate = lockMap.get(resource);
-            if (operate != null && process.getProcessId() == operate.getProcessId()) {
-                if (!process.getChannel().equals(operate.getChannel()) || process.getProcessId() != operate
-                        .getProcessId()) {
-                    log.error("注意检查错误情况:process:{},operate:{}", process, operate);
-                }
-                Operate nextOperate = unLock(resource);
+    public List<Operate> processDown(Process process) {
+        log.debug("precess is down. process:{}", process);
+        List<Operate> unLockSet = new ArrayList<>();
+        List<Operate> operates = process.getOperates();
+        if (operates == null || operates.isEmpty()) {
+            return unLockSet;
+        }
+        for (Operate operate : operates) {
+            Operate currentOperate = lockMap.get(operate.getResource());
+            if (currentOperate != null && process.getProcessId() == currentOperate.getProcessId()) {
+                Operate nextOperate = unLock(operate);
                 if (nextOperate != null) {
                     unLockSet.add(nextOperate);
                 }
             }
-
-
         }
+        lockInterceptors.forEach(i -> i.processDown(process, unLockSet));
         return unLockSet;
     }
 
     private void pushChannel(String resource, Operate channel) {
-        Deque<Operate> operators = conditionOperator.get(resource);
+        Queue<Operate> operators = conditionQueue.get(resource);
         if (operators == null) {
-            operators = new LinkedList<>();
-            conditionOperator.put(resource, operators);
+            operators = new ConcurrentLinkedQueue<>();
+            Queue<Operate> ifAbsent = conditionQueue.putIfAbsent(resource, operators);
+            if (ifAbsent != null) {
+                operators = ifAbsent;
+            }
         }
-        operators.addLast(channel);
+        operators.add(channel);
     }
 
     private Operate popChannel(String resource) {
-        Deque<Operate> operators = conditionOperator.get(resource);
-        if (operators == null || operators.size() == 0) {
-            return null;
+        Queue<Operate> operators = conditionQueue.get(resource);
+
+        Operate poll = null;
+        while (!operators.isEmpty() && poll == null) {
+            poll = operators.poll();
+            if (!poll.getChannel().isActive()) {
+                poll = null;
+            }
         }
-        return operators.pollFirst();
+        return poll;
     }
 
+    public void addLockInterceptor(LockInterceptor lockInterceptor) {
+        this.lockInterceptors.add(lockInterceptor);
+    }
+
+    public Map peekLockMap() {
+        return Collections.unmodifiableMap(lockMap);
+    }
+    public Map peekLockQueue() {
+        return Collections.unmodifiableMap(conditionQueue);
+    }
 }

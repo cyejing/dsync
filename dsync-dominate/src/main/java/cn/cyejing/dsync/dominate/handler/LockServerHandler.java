@@ -13,6 +13,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
+import java.util.List;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * @Create: 2018-10-16 16:36
  **/
 @Slf4j
-public class ProtocolHandler extends SimpleChannelInboundHandler<Request> {
+public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
 
 
     private LockCarrier lockCarrier = LockCarrier.getInstance();
@@ -36,30 +37,22 @@ public class ProtocolHandler extends SimpleChannelInboundHandler<Request> {
                 Process process = new Process(channel);
                 processCarrier.addProcess(process);
                 Response response = new Response(Steps.Connect, process.getProcessId(), -1L, null, ResponseCode.Ok);
-                writeResponse(channel, response);
+                channel.writeAndFlush(JSON.toJSONString(response));
                 break;
             }
             case Lock: {
                 Channel channel = ctx.channel();
-                Process process = processCarrier.get(req.getProcessId());
-                if (process == null) {
-                    // 服务器重启,之前的Process已丢失
-                    process = new Process(channel);
-                    processCarrier.addProcess(process);
-                }
-                Operate operate = new Operate(process.getProcessId(), req.getLockId(), req.getResource(), channel);
-
-                if (lockCarrier.tryLock(operate.getResource(), operate)) {
-                    process.addResource(operate.getResource());
-                    Response response = new Response(Steps.Unlock, process.getProcessId(), operate.getLockId(),
-                            operate.getResource(), ResponseCode.Ok);
-                    writeResponse(channel, response);
+                Operate operate = new Operate(req.getProcessId(), req.getLockId(), req.getResource(), channel);
+                if (lockCarrier.tryLock(operate)) {
+                    writeUnlock(operate);
                 }
                 break;
             }
             case Unlock: {
-                Operate nextOperate = lockCarrier.unLock(req.getResource());
-                unlock(nextOperate);
+                Channel channel = ctx.channel();
+                Operate operate = new Operate(req.getProcessId(), req.getLockId(), req.getResource(), channel);
+                Operate nextOperate = lockCarrier.unLock(operate);
+                writeUnlock(nextOperate);
                 break;
             }
             case Close:
@@ -73,52 +66,46 @@ public class ProtocolHandler extends SimpleChannelInboundHandler<Request> {
         }
     }
 
-    private void unlock(Operate nextOperate) {
-        log.debug("unlock next operate:{}", nextOperate);
+    private void writeUnlock(Operate nextOperate) {
+        log.debug("writeUnlock next operate:{}", nextOperate);
         if (nextOperate != null) {
             Channel nextOperatorChannel = nextOperate.getChannel();
             Response response = new Response(Steps.Unlock, nextOperate.getProcessId(), nextOperate.getLockId(),
                     nextOperate.getResource(), ResponseCode.Ok);
-            writeResponse(nextOperatorChannel, response);
+            nextOperatorChannel.writeAndFlush(JSON.toJSONString(response));
         }
     }
 
-    private void writeResponse(Channel channel, Response response) {
-        channel.writeAndFlush(JSON.toJSONString(response));
-    }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
-        log.info("channelUnregistered:{}", ctx.channel());
+        log.debug("channelUnregistered:{}", ctx.channel());
         Channel channel = ctx.channel();
         Process process = processCarrier.get(channel);
-        Set<Operate> operates = lockCarrier.processDown(process);
-        processCarrier.removeProcess(process);
-
+        List<Operate> operates = lockCarrier.processDown(process);
         operates.forEach(o -> {
-            processCarrier.addProcessResource(o);
-            unlock(o);
+            writeUnlock(o);
         });
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        log.info("channelActive:{}", ctx.channel());
+        log.debug("channelActive:{}", ctx.channel());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        log.info("channelInactive:{}", ctx.channel());
+        log.debug("channelInactive:{}", ctx.channel());
 
     }
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         super.channelReadComplete(ctx);
-        log.info("channelReadComplete:{}", ctx.channel());
+        log.debug("channelReadComplete:{}", ctx.channel());
 
     }
 
@@ -128,20 +115,20 @@ public class ProtocolHandler extends SimpleChannelInboundHandler<Request> {
         if (evt instanceof IdleStateEvent) {
             return;
         }
-        log.info("userEventTriggered:{},event:{}", ctx.channel(), evt);
+        log.debug("userEventTriggered:{},event:{}", ctx.channel(), evt);
     }
 
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
         super.channelWritabilityChanged(ctx);
-        log.info("channelWritabilityChanged:{}", ctx.channel());
+        log.debug("channelWritabilityChanged:{}", ctx.channel());
 
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
-        log.info("exceptionCaught:{}", ctx.channel(), cause);
+        log.debug("exceptionCaught:{}", ctx.channel(), cause);
 
     }
 }

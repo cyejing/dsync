@@ -19,7 +19,11 @@ public class ServerMain {
 
 
     public static void main(String[] args) throws InterruptedException {
-        EventLoopGroup bossEventLoopGroup = new NioEventLoopGroup(1);
+        int port = 4843;
+        if (args.length > 0) {
+            port = Integer.parseInt(args[0]);
+        }
+        EventLoopGroup bossEventLoopGroup = new NioEventLoopGroup(5);
         EventLoopGroup workerEventLoopGroup = new NioEventLoopGroup(10);
         try {
             Channel channel = new ServerBootstrap()
@@ -28,7 +32,7 @@ public class ServerMain {
                     .channel(NioServerSocketChannel.class)
                     .handler(new LoggingHandler(LogLevel.DEBUG))
                     .childHandler(new ServerChannelInitializer())
-                    .bind(8080).sync().channel();
+                    .bind(port).sync().channel();
             channel.closeFuture().sync();
         } finally {
             bossEventLoopGroup.shutdownGracefully();

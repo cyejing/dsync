@@ -18,6 +18,8 @@ import io.netty.handler.codec.json.JsonObjectDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
@@ -25,6 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DLock {
+
+    private static String host = "localhost";
+    private static int port = 4843;
+
 
     private volatile long processId;
     private Channel channel;
@@ -34,12 +40,19 @@ public class DLock {
 
     private AtomicLong lockIdAdder = new AtomicLong(1);
 
-    private static DLock ourInstance = new DLock();
+    private static DLock instance;
 
     private CountDownLatch initProcessLatch = new CountDownLatch(1);
 
     public static DLock getInstance() {
-        return ourInstance;
+        if (instance == null) {
+            synchronized (DLock.class) {
+                if (instance == null) {
+                    instance = new DLock();
+                }
+            }
+        }
+        return instance;
     }
 
     private DLock() {
@@ -55,7 +68,7 @@ public class DLock {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ch.pipeline().addLast(
-//                                    new LoggingHandler(LogLevel.DEBUG),
+//                                    new LoggingHandler(LogLevel.INFO),
                                     new StringEncoder(),
                                     new JsonObjectDecoder(),
                                     new ResponseMessageToMessage(),
@@ -63,7 +76,7 @@ public class DLock {
 
                         }
                     })
-                    .connect("localhost", 8080)
+                    .connect(host, port)
                     .addListener((ChannelFutureListener) future -> {
                         Channel channel = future.channel();
                         Request define = new Request(-1L, -1L, Steps.Connect, null);
@@ -71,36 +84,22 @@ public class DLock {
                         log.debug("connect to server");
                     });
 
-//            channelFuture.sync();
             channel = channelFuture.channel();
 
-//            Request define = new Request(-1L, -1L, Steps.Connect, null);
-//            channel.writeAndFlush(JSON.toJSONString(define));
-//            log.debug("connect to server");
         } catch (Exception e) {
             log.error("connect error", e);
         }
-
-    }
-
-    public void revisionProcessId(long serverProcessId) {
-        long localProcessId = this.processId;
-        if (localProcessId == 0 || serverProcessId < localProcessId) {
-            this.processId = serverProcessId;
-            initProcessLatch.countDown();
-            log.info("revision processId:{}", this.processId);
-        }
-    }
-
-    public long createLockId() {
-        return lockIdAdder.getAndIncrement();
     }
 
     public void lock(String resource) {
+        if (channel == null) {
+            log.error("未连接到远程服务端");
+            throw new RuntimeException("未连接到远程服务端");
+        }
         if (threadLocal.get() != null) {
             return;
         }
-        long processId = syncGetProcessId();
+        long processId = syncGetProcessId(); //重启也要获得新的processId
         long lockId = createLockId();
         String key = lockId + "-" + resource;
         log.debug("put latch of key:{}", key);
@@ -119,10 +118,22 @@ public class DLock {
         }
     }
 
+    public void unLock() {
+        if (channel == null) {
+            log.error("未连接到远程服务端");
+            throw new RuntimeException("未连接到远程服务端");
+        }
+        Request request = threadLocal.get();
+        request.setOperate(Steps.Unlock);
+        log.debug("unlock request:{}", request);
+        channel.writeAndFlush(JSON.toJSONString(request));
+        threadLocal.remove();
+    }
+
     private long syncGetProcessId() {
         try {
             if (this.processId == 0) {
-                log.error("waiting for server response process  id");
+                log.debug("waiting for server response process  id");
                 initProcessLatch.await();
             }
         } catch (InterruptedException e) {
@@ -131,12 +142,17 @@ public class DLock {
         return this.processId;
     }
 
-    public void unLock() {
-        Request request = threadLocal.get();
-        request.setOperate(Steps.Unlock);
-        log.debug("unlock request:{}", request);
-        channel.writeAndFlush(JSON.toJSONString(request));
-        threadLocal.remove();
+    void revisionProcessId(long serverProcessId) {
+        long localProcessId = this.processId;
+        if (localProcessId == 0 || serverProcessId < localProcessId) {
+            this.processId = serverProcessId;
+            initProcessLatch.countDown();
+            log.info("revision processId:{}", this.processId);
+        }
+    }
+
+    private long createLockId() {
+        return lockIdAdder.getAndIncrement();
     }
 
     void countDown(long lockId, String resource) {
@@ -149,6 +165,15 @@ public class DLock {
                 localLock.remove(key);
             }
         }
+    }
+
+
+    public static void setHost(String host) {
+        DLock.host = host;
+    }
+
+    public static void setPort(int port) {
+        DLock.port = port;
     }
 
 }
