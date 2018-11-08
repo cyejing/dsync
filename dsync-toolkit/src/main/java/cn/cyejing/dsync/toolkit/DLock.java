@@ -2,15 +2,18 @@ package cn.cyejing.dsync.toolkit;
 
 import cn.cyejing.dsync.common.handler.ResponseMessageToMessage;
 import cn.cyejing.dsync.common.model.Request;
+import cn.cyejing.dsync.common.model.Response;
 import cn.cyejing.dsync.common.model.Steps;
 import com.alibaba.fastjson.JSON;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -18,8 +21,6 @@ import io.netty.handler.codec.json.JsonObjectDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
@@ -174,6 +175,28 @@ public class DLock {
 
     public static void setPort(int port) {
         DLock.port = port;
+    }
+
+    class LockHandler extends SimpleChannelInboundHandler<Response> {
+
+        private DLock lock = DLock.getInstance();
+
+        @Override
+        protected void channelRead0(ChannelHandlerContext ctx, Response res) throws Exception {
+            switch (res.getOperate()) {
+                case Connect: {
+                    lock.revisionProcessId(res.getProcessId());
+                    break;
+                }
+                case Unlock: {
+                    lock.countDown(res.getLockId(), res.getResource());
+                    break;
+                }
+                default: {
+                    log.debug("ignore unknown operate:{}", res.getOperate());
+                }
+            }
+        }
     }
 
 }
