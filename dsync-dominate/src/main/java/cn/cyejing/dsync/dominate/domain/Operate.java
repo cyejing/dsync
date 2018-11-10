@@ -23,6 +23,8 @@ public class Operate {
     private String resource;
     private Channel channel;
 
+    private boolean active;
+
     public Operate(long processId,long lockId, String resource, Channel channel) {
         this.processId = processId;
         this.lockId = lockId;
@@ -49,5 +51,9 @@ public class Operate {
     @Override
     public int hashCode() {
         return Objects.hash(operateId, processId, lockId, resource);
+    }
+
+    public void Inactive() {
+        this.active = false;
     }
 }

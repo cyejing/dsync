@@ -17,11 +17,22 @@ public class Process {
 
     private long processId;
     private List<Operate> operates = new LinkedList<>();
+    private List<Operate> lockOperates = new LinkedList<>();
     private Channel channel;
+    private boolean active;
 
     public Process(Channel channel) {
         this.channel = channel;
         this.processId = ProcessCarrier.getInstance().createProcessId();
+        this.active = true;
+    }
+
+    public void addLockOperate(Operate operate) {
+        lockOperates.add(operate);
+    }
+
+    public void removeLockOperate(Operate operate) {
+        lockOperates.remove(operate);
     }
 
     public void addOperate(Operate operate) {
@@ -29,5 +40,10 @@ public class Process {
     }
     public void removeOperate(Operate operate){
         operates.remove(operate);
+    }
+
+    public void Inactive() {
+        this.active = false;
+        operates.forEach(Operate::Inactive);
     }
 }

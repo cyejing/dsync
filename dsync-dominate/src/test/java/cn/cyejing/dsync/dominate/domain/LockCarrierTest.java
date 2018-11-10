@@ -67,4 +67,12 @@ public class LockCarrierTest {
         assertEquals(operate3, operates2.iterator().next());
         lockCarrier.unLock(operate3);
     }
+
+    /**
+     * 测试关闭应用时候,对应Operate是否能完全清理掉
+     */
+
+    /**
+     * 测试
+     */
 }

@@ -17,14 +17,16 @@ public class ProcessPostLockInterceptor implements LockInterceptor {
     @Override
     public void lock(Operate operate, boolean lock) {
         if (lock) {
-            processCarrier.addProcessOperate(operate);
+            processCarrier.addProcessLockOperate(operate);
         }
+        processCarrier.addProcessOperate(operate);
     }
 
     @Override
     public void unlock(Operate currentOperate, Operate nextOperate) {
         processCarrier.removeProcessOperate(currentOperate);
-        processCarrier.addProcessOperate(nextOperate);
+        processCarrier.removeProcessLockOperate(currentOperate);
+        processCarrier.addProcessLockOperate(nextOperate);
     }
 
     @Override

@@ -77,8 +77,9 @@ public class LockCarrier {
 
     public List<Operate> processDown(Process process) {
         log.debug("precess is down. process:{}", process);
+        process.Inactive();
         List<Operate> unLockSet = new ArrayList<>();
-        List<Operate> operates = process.getOperates();
+        List<Operate> operates = process.getLockOperates();
         if (operates == null || operates.isEmpty()) {
             return unLockSet;
         }
@@ -113,7 +114,7 @@ public class LockCarrier {
         Operate poll = null;
         while (!operators.isEmpty() && poll == null) {
             poll = operators.poll();
-            if (!poll.getChannel().isActive()) {
+            if (!poll.isActive() && !poll.getChannel().isActive()) {
                 poll = null;
             }
         }

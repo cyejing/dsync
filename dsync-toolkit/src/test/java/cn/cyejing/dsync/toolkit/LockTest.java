@@ -14,19 +14,22 @@ import org.junit.Test;
 public class LockTest {
     private int i = 0;
 
-    ExecutorService executorService = Executors.newFixedThreadPool(5);
+    ExecutorService executorService = Executors.newFixedThreadPool(10);
 
 
     @Test
     public void testLock() throws Exception {
         /**
-         * 5c 1000n 3606ms
-         * 5c 1000n 3531ms
-         * 5c 1000n 4270ms
-         * 5c 1000n 3887ms
+         * 5c 1000n 3462ms
+         * 10c 1000n 3536ms
+         * 20c 1000n 3918ms
+         * 10c 5000n 15413ms
+         * 10c 10000n 29734ms
          */
-        DLock.setHost("192.168.9.107");
-        int count = 1000;
+        DLock.setHost("172.31.9.150");
+//        DLock.setHost("localhost");
+        int count = 500;
+        long start = System.currentTimeMillis();
         for (int j = 0; j < count; j++) {
             executorService.submit(() -> {
                 DLock.getInstance().lock("adder");
@@ -34,9 +37,9 @@ public class LockTest {
                 DLock.getInstance().unLock();
             });
         }
-
         executorService.shutdown();
         executorService.awaitTermination(1, TimeUnit.DAYS);
         Assert.assertEquals(count, i);
+        System.out.println("cost:" + (System.currentTimeMillis() - start) + "ms");
     }
 }

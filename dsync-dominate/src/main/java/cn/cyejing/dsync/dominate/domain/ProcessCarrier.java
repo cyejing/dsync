@@ -47,6 +47,26 @@ public class ProcessCarrier {
         return processChannelMap.get(channel);
     }
 
+    public void addProcessLockOperate(Operate operate) {
+        log.debug("add resource of operate:{}", operate);
+        if (operate != null) {
+            Process process = processIdMap.get(operate.getProcessId());
+            if (process != null) {
+                process.addLockOperate(operate);
+            }
+        }
+    }
+
+    public void removeProcessLockOperate(Operate operate) {
+        log.debug("remove resource of operate:{}", operate);
+        if (operate != null) {
+            Process process = processIdMap.get(operate.getProcessId());
+            if (process != null) {
+                process.removeLockOperate(operate);
+            }
+        }
+    }
+
     public void addProcessOperate(Operate operate) {
         log.debug("add resource of operate:{}", operate);
         if (operate != null) {
