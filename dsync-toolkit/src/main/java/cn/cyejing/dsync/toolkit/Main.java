@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         DLock.getInstance().lock("asd");
         System.out.println("getLock");
-        DLock.getInstance().unLock();
+        DLock.getInstance().unlock();
         System.out.println("getLock2");
         DLock.getInstance().lock("asd");
 

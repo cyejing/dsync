@@ -26,9 +26,7 @@ public class TraceLockInterceptor implements LockInterceptor {
 
     private void logLockCarrier() {
         Map map = lockCarrier.peekLockMap();
-        Map queue = lockCarrier.peekLockQueue();
         log.debug("map:{}", JSON.toJSONString(map));
-        log.debug("queue:{}", JSON.toJSONString(queue));
     }
 
     @Override

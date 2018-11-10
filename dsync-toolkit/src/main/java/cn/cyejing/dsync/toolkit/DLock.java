@@ -119,12 +119,16 @@ public class DLock {
         }
     }
 
-    public void unLock() {
+    public void unlock() {
         if (channel == null) {
             log.error("未连接到远程服务端");
             throw new RuntimeException("未连接到远程服务端");
         }
         Request request = threadLocal.get();
+        if (request == null) {
+            log.warn("warning repeat unlock");
+            return;
+        }
         request.setOperate(Steps.Unlock);
         log.debug("unlock request:{}", request);
         channel.writeAndFlush(JSON.toJSONString(request));

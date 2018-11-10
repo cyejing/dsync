@@ -83,9 +83,7 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
         Channel channel = ctx.channel();
         Process process = processCarrier.get(channel);
         List<Operate> operates = lockCarrier.processRelease(process);
-        operates.forEach(o -> {
-            writeUnlock(o);
-        });
+        operates.forEach(o -> writeUnlock(o));
     }
 
     @Override

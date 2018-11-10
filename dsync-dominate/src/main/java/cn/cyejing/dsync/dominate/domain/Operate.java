@@ -23,7 +23,7 @@ public class Operate {
     private String resource;
     private Channel channel;
 
-    private boolean active;
+    private boolean active = true;
 
     public Operate(long processId,long lockId, String resource, Channel channel) {
         this.processId = processId;

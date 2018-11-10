@@ -27,14 +27,14 @@ public class LockTest {
          * 10c 10000n 29734ms
          */
         DLock.setHost("172.31.9.150");
-//        DLock.setHost("localhost");
-        int count = 500;
+        DLock.setHost("localhost");
+        int count = 20000;
         long start = System.currentTimeMillis();
         for (int j = 0; j < count; j++) {
             executorService.submit(() -> {
                 DLock.getInstance().lock("adder");
                 i++;
-                DLock.getInstance().unLock();
+                DLock.getInstance().unlock();
             });
         }
         executorService.shutdown();
