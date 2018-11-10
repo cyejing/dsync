@@ -14,7 +14,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 import java.util.List;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -43,7 +42,7 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
             case Lock: {
                 Channel channel = ctx.channel();
                 Operate operate = new Operate(req.getProcessId(), req.getLockId(), req.getResource(), channel);
-                if (lockCarrier.tryLock(operate)) {
+                if (lockCarrier.acquire(operate)) {
                     writeUnlock(operate);
                 }
                 break;
@@ -51,7 +50,7 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
             case Unlock: {
                 Channel channel = ctx.channel();
                 Operate operate = new Operate(req.getProcessId(), req.getLockId(), req.getResource(), channel);
-                Operate nextOperate = lockCarrier.unLock(operate);
+                Operate nextOperate = lockCarrier.release(operate);
                 writeUnlock(nextOperate);
                 break;
             }
@@ -83,7 +82,7 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
         log.debug("channelUnregistered:{}", ctx.channel());
         Channel channel = ctx.channel();
         Process process = processCarrier.get(channel);
-        List<Operate> operates = lockCarrier.processDown(process);
+        List<Operate> operates = lockCarrier.processRelease(process);
         operates.forEach(o -> {
             writeUnlock(o);
         });

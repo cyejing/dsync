@@ -4,13 +4,8 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 import io.netty.channel.embedded.EmbeddedChannel;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class LockCarrierTest {
     private EmbeddedChannel channel = new EmbeddedChannel();
@@ -19,10 +14,10 @@ public class LockCarrierTest {
     @Test
     public void testLock() {
         Operate operate = new Operate(1L, 1L, "asd", channel);
-        assertTrue(lockCarrier.tryLock(operate));
-        assertFalse(lockCarrier.tryLock(operate));
-        lockCarrier.unLock(operate);
-        lockCarrier.unLock(operate);
+        assertTrue(lockCarrier.acquire(operate));
+        assertFalse(lockCarrier.acquire(operate));
+        lockCarrier.release(operate);
+        lockCarrier.release(operate);
     }
 
     @Test
@@ -30,12 +25,12 @@ public class LockCarrierTest {
         Operate operate1 = new Operate(1L, 1L, "asd", channel);
         Operate operate2 = new Operate(1L, 2L, "asd", channel);
         Operate operate3 = new Operate(1L, 3L, "asd", channel);
-        assertTrue(lockCarrier.tryLock(operate1));
-        assertFalse(lockCarrier.tryLock(operate2));
-        assertFalse(lockCarrier.tryLock(operate3));
-       assertEquals(operate2,lockCarrier.unLock(operate1));
-       assertEquals(operate3,lockCarrier.unLock(operate2));
-        lockCarrier.unLock(operate3);
+        assertTrue(lockCarrier.acquire(operate1));
+        assertFalse(lockCarrier.acquire(operate2));
+        assertFalse(lockCarrier.acquire(operate3));
+       assertEquals(operate2,lockCarrier.release(operate1));
+       assertEquals(operate3,lockCarrier.release(operate2));
+        lockCarrier.release(operate3);
     }
 
     @Test
@@ -50,22 +45,22 @@ public class LockCarrierTest {
         Operate operate1 = new Operate(1L, 1L, "asd", channel);
         Operate operate2 = new Operate(2L, 2L, "asd", channel);
         Operate operate3 = new Operate(3L, 3L, "asd", channel);
-        assertTrue(lockCarrier.tryLock( operate1));
-        assertFalse(lockCarrier.tryLock( operate2));
-        assertFalse(lockCarrier.tryLock( operate3));
+        assertTrue(lockCarrier.acquire( operate1));
+        assertFalse(lockCarrier.acquire( operate2));
+        assertFalse(lockCarrier.acquire( operate3));
 
 
 
-        List<Operate> operates = lockCarrier.processDown(process1);
+        List<Operate> operates = lockCarrier.processRelease(process1);
         assertEquals(1, operates.size());
         assertEquals(operate2, operates.iterator().next());
 
 
 
-        List<Operate> operates2 = lockCarrier.processDown(process2);
+        List<Operate> operates2 = lockCarrier.processRelease(process2);
         assertEquals(1, operates2.size());
         assertEquals(operate3, operates2.iterator().next());
-        lockCarrier.unLock(operate3);
+        lockCarrier.release(operate3);
     }
 
     /**

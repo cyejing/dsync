@@ -2,7 +2,6 @@ package cn.cyejing.dsync.dominate.domain;
 
 import cn.cyejing.dsync.dominate.interceptor.LockInterceptor;
 import cn.cyejing.dsync.dominate.interceptor.ProcessPostLockInterceptor;
-import cn.cyejing.dsync.dominate.interceptor.TraceLockInterceptor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,25 +37,25 @@ public class LockCarrier {
         return lockCarrier;
     }
 
-    public boolean tryLock(Operate operate) {
+        public boolean acquire(Operate operate) {
         String resource = operate.getResource();
-        log.debug("lock resource:{},operate:{}", resource, operate);
+        log.debug("acquire resource:{},operate:{}", resource, operate);
         Operate ifAbsent = lockMap.putIfAbsent(resource, operate);
         boolean lock = ifAbsent == null ? true : false;
         if (!lock) {
-            log.debug("lock resource:{} fail, push to deque. operate:{}", resource, operate);
+            log.debug("acquire resource:{} fail, push to deque. operate:{}", resource, operate);
             pushChannel(resource, operate);
         }
-        lockInterceptors.forEach(i -> i.lock(operate, lock));
+        lockInterceptors.forEach(i -> i.acquire(operate, lock));
         return lock;
     }
 
-    public Operate unLock(Operate operate) {
+    public Operate release(Operate operate) {
         String resource = operate.getResource();
-        log.debug("unlock resource:{}", resource);
+        log.debug("release resource:{}", resource);
         Operate currentOperate = lockMap.get(resource);
         if (!operate.equals(currentOperate)) {
-            log.error("unlock fail, because operate not current lock. current:{}, unlock:{}", currentOperate,
+            log.error("release fail, because operate not current acquire. current:{}, release:{}", currentOperate,
                     operate);
             return null;
         }
@@ -71,11 +70,11 @@ public class LockCarrier {
         if (!currentOperate.equals(oldOperate)) {
             log.error("###Error that should not happen!!!");
         }
-        lockInterceptors.forEach(i -> i.unlock(oldOperate, nextOperate));
+        lockInterceptors.forEach(i -> i.release(oldOperate, nextOperate));
         return nextOperate;
     }
 
-    public List<Operate> processDown(Process process) {
+    public List<Operate> processRelease(Process process) {
         log.debug("precess is down. process:{}", process);
         process.Inactive();
         List<Operate> unLockSet = new ArrayList<>();
@@ -86,7 +85,7 @@ public class LockCarrier {
         for (Operate operate : operates) {
             Operate currentOperate = lockMap.get(operate.getResource());
             if (currentOperate != null && process.getProcessId() == currentOperate.getProcessId()) {
-                Operate nextOperate = unLock(operate);
+                Operate nextOperate = release(operate);
                 if (nextOperate != null) {
                     unLockSet.add(nextOperate);
                 }

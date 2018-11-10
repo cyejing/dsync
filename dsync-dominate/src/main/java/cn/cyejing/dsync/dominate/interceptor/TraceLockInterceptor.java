@@ -17,11 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TraceLockInterceptor implements LockInterceptor {
 
-    private ProcessCarrier processCarrier = ProcessCarrier.getInstance();
     private LockCarrier lockCarrier = LockCarrier.getInstance();
 
     @Override
-    public void lock(Operate operate, boolean lock) {
+    public void acquire(Operate operate, boolean lock) {
         logLockCarrier();
     }
 
@@ -33,7 +32,7 @@ public class TraceLockInterceptor implements LockInterceptor {
     }
 
     @Override
-    public void unlock(Operate currentOperate, Operate nextOperate) {
+    public void release(Operate currentOperate, Operate nextOperate) {
         logLockCarrier();
 
     }

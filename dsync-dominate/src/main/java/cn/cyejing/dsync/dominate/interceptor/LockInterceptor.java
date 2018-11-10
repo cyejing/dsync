@@ -11,9 +11,9 @@ import java.util.List;
  **/
 public interface LockInterceptor {
 
-    void lock(Operate operate,boolean lock);
+    void acquire(Operate operate,boolean lock);
 
-    void unlock(Operate currentOperate,Operate nextOperate);
+    void release(Operate currentOperate,Operate nextOperate);
 
     void processDown(Process process, List<Operate> operates);
 }

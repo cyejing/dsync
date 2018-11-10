@@ -15,7 +15,7 @@ public class ProcessPostLockInterceptor implements LockInterceptor {
     private ProcessCarrier processCarrier = ProcessCarrier.getInstance();
 
     @Override
-    public void lock(Operate operate, boolean lock) {
+    public void acquire(Operate operate, boolean lock) {
         if (lock) {
             processCarrier.addProcessLockOperate(operate);
         }
@@ -23,7 +23,7 @@ public class ProcessPostLockInterceptor implements LockInterceptor {
     }
 
     @Override
-    public void unlock(Operate currentOperate, Operate nextOperate) {
+    public void release(Operate currentOperate, Operate nextOperate) {
         processCarrier.removeProcessOperate(currentOperate);
         processCarrier.removeProcessLockOperate(currentOperate);
         processCarrier.addProcessLockOperate(nextOperate);
