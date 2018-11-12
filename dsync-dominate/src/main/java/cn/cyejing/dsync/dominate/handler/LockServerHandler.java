@@ -76,33 +76,15 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
     }
 
 
-    @Override
-    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        super.channelUnregistered(ctx);
-        log.debug("channelUnregistered:{}", ctx.channel());
-        Channel channel = ctx.channel();
-        Process process = processCarrier.get(channel);
-        List<Operate> operates = lockCarrier.processRelease(process);
-        operates.forEach(o -> writeUnlock(o));
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-        log.debug("channelActive:{}", ctx.channel());
-    }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         log.debug("channelInactive:{}", ctx.channel());
-
-    }
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        super.channelReadComplete(ctx);
-        log.debug("channelReadComplete:{}", ctx.channel());
+        Channel channel = ctx.channel();
+        Process process = processCarrier.get(channel);
+        List<Operate> operates = lockCarrier.processRelease(process);
+        operates.forEach(o -> writeUnlock(o));
 
     }
 
@@ -115,17 +97,10 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
         log.debug("userEventTriggered:{},event:{}", ctx.channel(), evt);
     }
 
-    @Override
-    public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
-        super.channelWritabilityChanged(ctx);
-        log.debug("channelWritabilityChanged:{}", ctx.channel());
-
-    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
-        log.debug("exceptionCaught:{}", ctx.channel(), cause);
-
+        log.error("exceptionCaught:{}", ctx.channel(), cause);
     }
 }

@@ -12,7 +12,7 @@ public class LockCarrierTest {
     private LockCarrier lockCarrier = LockCarrier.getInstance();
 
     @Test
-    public void testLock() {
+    public void testAcquire() {
         Operate operate = new Operate(1L, 1L, "asd", channel);
         assertTrue(lockCarrier.acquire(operate));
         assertFalse(lockCarrier.acquire(operate));
@@ -21,7 +21,7 @@ public class LockCarrierTest {
     }
 
     @Test
-    public void testLock1() {
+    public void testRelease() {
         Operate operate1 = new Operate(1L, 1L, "asd", channel);
         Operate operate2 = new Operate(1L, 2L, "asd", channel);
         Operate operate3 = new Operate(1L, 3L, "asd", channel);
@@ -34,7 +34,7 @@ public class LockCarrierTest {
     }
 
     @Test
-    public void testLock2() {
+    public void testProcessRelease() {
         Process process1 = new Process(channel);
         process1.setProcessId(1L);
         ProcessCarrier.getInstance().addProcess(process1);
@@ -44,30 +44,35 @@ public class LockCarrierTest {
 
         Operate operate1 = new Operate(1L, 1L, "asd", channel);
         Operate operate2 = new Operate(2L, 2L, "asd", channel);
+        Operate operate21 = new Operate(2L, 3L, "asd", channel);
         Operate operate3 = new Operate(3L, 3L, "asd", channel);
         assertTrue(lockCarrier.acquire( operate1));
         assertFalse(lockCarrier.acquire( operate2));
+        assertFalse(lockCarrier.acquire( operate21));
         assertFalse(lockCarrier.acquire( operate3));
 
-
-
+        assertEquals(process1.getOperates().get(0),operate1);
+        assertEquals(process2.getOperates().get(0),operate2);
+        assertEquals(process2.getOperates().get(1),operate21);
         List<Operate> operates = lockCarrier.processRelease(process1);
-        assertEquals(1, operates.size());
-        assertEquals(operate2, operates.iterator().next());
+        assertEquals(operate2, operates.get(0));
+        assertFalse(process1.isActive());
+        assertFalse(operate1.isActive());
+
 
 
 
         List<Operate> operates2 = lockCarrier.processRelease(process2);
-        assertEquals(1, operates2.size());
-        assertEquals(operate3, operates2.iterator().next());
-        lockCarrier.release(operate3);
+        assertEquals(operate3, operates2.get(0));
+        assertFalse(process2.isActive());
+        assertFalse(operate2.isActive());
+        assertFalse(operate21.isActive());
+
+        assertEquals(lockCarrier.peekLockMap().get("asd").getCurrentOperate(),operate3);
+        Operate release = lockCarrier.release(operate3);
+        assertEquals(null,release);
+        assertEquals(lockCarrier.peekLockMap().get("asd").getCurrentOperate(),null);
     }
 
-    /**
-     * 测试关闭应用时候,对应Operate是否能完全清理掉
-     */
 
-    /**
-     * 测试
-     */
 }

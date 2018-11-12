@@ -27,8 +27,8 @@ public class LockTest {
          * 10c 10000n 29734ms
          */
         DLock.setHost("172.31.9.150");
-        DLock.setHost("localhost");
-        int count = 20000;
+//        DLock.setHost("localhost");
+        int count = 1000;
         long start = System.currentTimeMillis();
         for (int j = 0; j < count; j++) {
             executorService.submit(() -> {

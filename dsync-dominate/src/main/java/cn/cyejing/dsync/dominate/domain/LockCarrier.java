@@ -83,7 +83,7 @@ public class LockCarrier {
         this.lockInterceptors.add(lockInterceptor);
     }
 
-    public Map peekLockMap() {
+    public Map<String,Lock> peekLockMap() {
         return Collections.unmodifiableMap(lockMap);
     }
 

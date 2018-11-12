@@ -38,6 +38,7 @@ public class Process {
     public void addOperate(Operate operate) {
         operates.add(operate);
     }
+
     public void removeOperate(Operate operate){
         operates.remove(operate);
     }
