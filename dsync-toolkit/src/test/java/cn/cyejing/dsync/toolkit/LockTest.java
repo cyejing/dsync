@@ -12,6 +12,7 @@ import org.junit.Test;
  * @Create: 2018-10-28 22:13
  **/
 public class LockTest {
+
     private int i = 0;
 
     ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -19,6 +20,8 @@ public class LockTest {
 
     @Test
     public void testLock() throws Exception {
+        DSync dSync = DSync.create(new Config());
+        DLock lock = dSync.getLock();
         /**
          * 5c 1000n 3462ms
          * 10c 1000n 3536ms
@@ -26,15 +29,14 @@ public class LockTest {
          * 10c 5000n 15413ms
          * 10c 10000n 29734ms
          */
-        DLock.setHost("172.31.9.150");
 //        DLock.setHost("localhost");
         int count = 1000;
         long start = System.currentTimeMillis();
         for (int j = 0; j < count; j++) {
             executorService.submit(() -> {
-                DLock.getInstance().lock("adder");
+                lock.lock("adder");
                 i++;
-                DLock.getInstance().unlock();
+                lock.unlock();
             });
         }
         executorService.shutdown();

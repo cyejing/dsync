@@ -12,6 +12,7 @@
     <module>dsync-toolkit</module>
     <module>dsync-dominate</module>
     <module>dsync-common</module>
+    <module>dsync-example</module>
   </modules>
 
   <properties>
