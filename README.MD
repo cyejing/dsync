@@ -1,6 +1,10 @@
 # Distributed Synchronize 分布式同步组件
+1. 分布式锁
+2. 基于Netty长连接实现
+3. 自定义协议,性能远超redis锁
 
-1. 启动服务端
+
+### 启动服务端
 ```
 java -jar -server dsync-dominate-xxx.jar
 ```
