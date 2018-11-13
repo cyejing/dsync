@@ -8,10 +8,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-10-27 13:29
- **/
+ *
+ * @author Born
+ */
 @Getter
 @Setter
 @ToString

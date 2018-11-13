@@ -8,12 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
-
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-10-17 16:14
- **/
+ *
+ * @author Born
+ */
 @Slf4j
 public class LockCarrier {
 

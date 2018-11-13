@@ -10,10 +10,9 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-11-06 15:55
- **/
+ *
+ * @author Born
+ */
 @Slf4j
 public class TraceLockInterceptor implements LockInterceptor {
 

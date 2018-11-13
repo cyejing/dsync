@@ -3,12 +3,10 @@ package cn.cyejing.dsync.dominate.domain;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.extern.slf4j.Slf4j;
-
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-11-10 20:51
- **/
+ *
+ * @author Born
+ */
 @Slf4j
 public class Lock {
 

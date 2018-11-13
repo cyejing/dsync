@@ -7,10 +7,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-10-27 13:31
- **/
+ *
+ * @author Born
+ */
 @Slf4j
 public class ProcessCarrier {
 

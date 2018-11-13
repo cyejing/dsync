@@ -7,13 +7,37 @@
   <groupId>cn.cyejing</groupId>
   <artifactId>dsync</artifactId>
   <packaging>pom</packaging>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.2</version>
   <modules>
     <module>dsync-toolkit</module>
     <module>dsync-dominate</module>
     <module>dsync-common</module>
     <module>dsync-example</module>
   </modules>
+
+  <name>dsync</name>
+  <description>
+    分布式锁,基于Netty长连接实现,自定义协议,高性能锁
+  </description>
+  <url>https://github.com/cyejing/dsync</url>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+  <scm>
+    <url>https://github.com/cyejing/dsync</url>
+    <connection>scm:git:git@github.com:cyejing/dsync.git</connection>
+    <developerConnection>scm:git:git@github.com:cyejing/dsync.git</developerConnection>
+    <tag>dsync</tag>
+  </scm>
+  <developers>
+    <developer>
+      <name>cyejing</name>
+      <email>jing23501@gmail.com</email>
+    </developer>
+  </developers>
 
   <properties>
     <current.version>1.0.1</current.version>
@@ -33,7 +57,79 @@
        <artifactId>netty-all</artifactId>
        <version>${netty.version}</version>
      </dependency>
-
    </dependencies>
  </dependencyManagement>
+
+  <profiles>
+    <profile>
+      <id>dev</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+    </profile>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <!--Compiler-->
+          <!-- Source -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- Javadoc -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+                <configuration>
+                  <additionalOptions>-Xdoclint:none</additionalOptions>
+                  <!--<additionalparam>-Xdoclint:none</additionalparam>-->
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- GPG mvn clean deploy -P release -Dgpg.passphrase=YourPassphase-->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+      <distributionManagement>
+        <snapshotRepository>
+          <id>oss</id>
+          <url>https://oss.sona
+            type.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+          <id>oss</id>
+          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+
 </project>

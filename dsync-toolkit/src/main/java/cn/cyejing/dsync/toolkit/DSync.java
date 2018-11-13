@@ -3,10 +3,9 @@ package cn.cyejing.dsync.toolkit;
 import cn.cyejing.dsync.toolkit.lock.DLockImpl;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-11-12 16:45
- **/
+ *
+ * @author Born
+ */
 public class DSync {
 
     private final Config config;

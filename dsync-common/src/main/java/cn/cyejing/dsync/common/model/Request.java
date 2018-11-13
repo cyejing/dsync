@@ -6,10 +6,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-10-16 17:50
- **/
+ *
+ * @author Born
+ */
 @Getter
 @Setter
 @ToString

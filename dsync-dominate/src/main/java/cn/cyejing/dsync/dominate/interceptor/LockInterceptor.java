@@ -5,10 +5,9 @@ import cn.cyejing.dsync.dominate.domain.Process;
 import java.util.List;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-11-06 11:18
- **/
+ *
+ * @author Born
+ */
 public interface LockInterceptor {
 
     void acquire(Operate operate,boolean lock);

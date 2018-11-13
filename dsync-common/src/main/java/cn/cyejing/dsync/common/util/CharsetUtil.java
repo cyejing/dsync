@@ -6,10 +6,9 @@ import java.nio.charset.Charset;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-10-17 10:07
- **/
+ *
+ * @author Born
+ */
 @Slf4j
 public class CharsetUtil {
     public static final Charset UTF_8 = Charset.forName("UTF-8");

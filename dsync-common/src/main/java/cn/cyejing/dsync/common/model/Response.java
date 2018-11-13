@@ -4,10 +4,9 @@ import java.io.Serializable;
 import lombok.Data;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-10-17 16:08
- **/
+ *
+ * @author Born
+ */
 @Data
 public class Response implements Serializable {
 

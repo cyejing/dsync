@@ -9,6 +9,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ *
+ * @author Born
+ */
 @Slf4j
 public class DLockImpl implements DLock {
 
@@ -114,3 +118,6 @@ public class DLockImpl implements DLock {
     }
 
 }
+
+
+

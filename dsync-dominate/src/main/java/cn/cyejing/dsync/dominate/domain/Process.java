@@ -8,10 +8,9 @@ import java.util.Set;
 import lombok.Data;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-10-27 13:27
- **/
+ *
+ * @author Born
+ */
 @Data
 public class Process {
 

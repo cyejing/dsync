@@ -1,10 +1,9 @@
 package cn.cyejing.dsync.toolkit;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-11-12 17:18
- **/
+ *
+ * @author Born
+ */
 public class Config {
 
     private String host = "localhost";

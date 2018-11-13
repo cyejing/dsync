@@ -10,10 +10,9 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-10-17 15:06
- **/
+ *
+ * @author Born
+ */
 @Slf4j
 public class ProtocolMessageToMessage extends MessageToMessageDecoder<ByteBuf> {
 

@@ -14,10 +14,9 @@ import io.netty.channel.socket.SocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-11-12 17:37
- **/
+ *
+ * @author Born
+ */
 @Slf4j
 public class DLockClient extends AbstractClient {
 

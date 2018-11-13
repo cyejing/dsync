@@ -17,9 +17,9 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @Author: Born
- * @Create: 2018-10-16 16:36
- **/
+ *
+ * @author Born
+ */
 @Slf4j
 public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
 

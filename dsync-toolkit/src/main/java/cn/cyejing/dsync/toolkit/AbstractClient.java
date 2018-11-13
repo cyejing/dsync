@@ -24,10 +24,9 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-11-12 15:52
- **/
+ *
+ * @author Born
+ */
 @Slf4j
 public abstract class AbstractClient {
 

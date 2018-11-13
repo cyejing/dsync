@@ -5,10 +5,9 @@ import cn.cyejing.dsync.toolkit.DLock;
 import cn.cyejing.dsync.toolkit.DSync;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-11-13 13:50
- **/
+ *
+ * @author Born
+ */
 public class LockExample {
 
     public static void main(String[] args) {

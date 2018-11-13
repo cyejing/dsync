@@ -6,10 +6,9 @@ import cn.cyejing.dsync.dominate.domain.ProcessCarrier;
 import java.util.List;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-11-06 15:55
- **/
+ *
+ * @author Born
+ */
 public class ProcessPostLockInterceptor implements LockInterceptor {
 
     private ProcessCarrier processCarrier = ProcessCarrier.getInstance();

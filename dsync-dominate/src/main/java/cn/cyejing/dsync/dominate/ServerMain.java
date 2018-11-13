@@ -11,10 +11,9 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 /**
- * @Description:
- * @Author: Born
- * @Create: 2018-10-16 16:19
- **/
+ *
+ * @author Born
+ */
 public class ServerMain {
 
 
