@@ -73,8 +73,8 @@ public class DLockImpl implements DLock {
             return;
         }
         request.setOperate(Steps.Unlock);
-        client.request(request);
         threadLocal.remove();
+        client.request(request);
     }
 
     void revisionProcessId(long serverProcessId) {

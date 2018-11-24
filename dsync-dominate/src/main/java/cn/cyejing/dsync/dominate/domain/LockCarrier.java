@@ -64,6 +64,7 @@ public class LockCarrier {
         List<Operate> releaseSet = new ArrayList<>();
         List<Operate> operates = process.getLockOperates();
         if (operates == null || operates.isEmpty()) {
+            lockInterceptors.forEach(i -> i.processDown(process, releaseSet));
             return releaseSet;
         }
         for (Operate operate : operates) {

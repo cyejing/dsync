@@ -75,8 +75,32 @@ public class DLockClient extends AbstractClient {
         }
 
         @Override
+        public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+            log.info("channelRegistered:{}", ctx.channel());
+            super.channelRegistered(ctx);
+        }
+
+        @Override
+        public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+            log.info("channelUnregistered:{}", ctx.channel());
+            super.channelUnregistered(ctx);
+        }
+
+        @Override
+        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+            log.info("channelActive:{}", ctx.channel());
+            super.channelActive(ctx);
+        }
+
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            super.userEventTriggered(ctx, evt);
+            log.info("userEventTriggered:{}", evt);
+        }
+
+        @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-            log.info("channelInactive");
+            log.info("channelInactive:{}", ctx.channel());
             super.channelInactive(ctx);
             lock.serverBreak();
             doConnect();

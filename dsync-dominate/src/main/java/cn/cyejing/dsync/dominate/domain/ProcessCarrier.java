@@ -1,6 +1,8 @@
 package cn.cyejing.dsync.dominate.domain;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelId;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ProcessCarrier {
 
     private Map<Long, Process> processIdMap = new HashMap<>();
-    private Map<Channel, Process> processChannelMap = new HashMap<>();
+    private Map<ChannelId, Process> processChannelMap = new HashMap<>();
     private AtomicInteger processIdAdder = new AtomicInteger(1);
 
     private static ProcessCarrier instance = new ProcessCarrier();
@@ -30,7 +32,7 @@ public class ProcessCarrier {
     public void addProcess(Process process){
         log.info("add process to carrier:{}", process);
         processIdMap.put(process.getProcessId(), process);
-        processChannelMap.put(process.getChannel(), process);
+        processChannelMap.put(process.getChannel().id(), process);
     }
 
 
@@ -43,7 +45,7 @@ public class ProcessCarrier {
     }
 
     public Process get(Channel channel) {
-        return processChannelMap.get(channel);
+        return processChannelMap.get(channel.id());
     }
 
     public void addProcessLockOperate(Operate operate) {
@@ -87,8 +89,12 @@ public class ProcessCarrier {
     }
 
     public void removeProcess(Process process) {
-        log.debug("process have remove:{}", process);
+        log.info("process have remove:{}", process);
         processIdMap.remove(process.getProcessId());
-        processChannelMap.remove(process.getChannel());
+        processChannelMap.remove(process.getChannel().id());
+    }
+
+    public Map<ChannelId,Process> peekProcessMap() {
+        return Collections.unmodifiableMap(processChannelMap);
     }
 }

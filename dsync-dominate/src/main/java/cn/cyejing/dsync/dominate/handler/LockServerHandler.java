@@ -75,26 +75,41 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
         }
     }
 
+    @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        log.info("channelRegistered:{}", ctx.channel());
+        super.channelRegistered(ctx);
+    }
 
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        log.info("channelUnregistered:{}", ctx.channel());
+        super.channelUnregistered(ctx);
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        log.info("channelActive:{}", ctx.channel());
+        super.channelActive(ctx);
+    }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        log.debug("channelInactive:{}", ctx.channel());
+        log.info("channelInactive:{}", ctx.channel());
         Channel channel = ctx.channel();
         Process process = processCarrier.get(channel);
         List<Operate> operates = lockCarrier.processRelease(process);
         operates.forEach(o -> writeUnlock(o));
-
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         super.userEventTriggered(ctx, evt);
+        log.info("userEventTriggered:{},event:{}", ctx.channel(), evt);
         if (evt instanceof IdleStateEvent) {
             return;
         }
-        log.debug("userEventTriggered:{},event:{}", ctx.channel(), evt);
     }
 
 

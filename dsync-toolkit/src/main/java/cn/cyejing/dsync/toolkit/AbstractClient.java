@@ -46,14 +46,13 @@ public abstract class AbstractClient {
     protected void bootstrap() {
         group = new NioEventLoopGroup();
         bootstrap = new Bootstrap().group(group)
-                .option(ChannelOption.SO_KEEPALIVE, true)
                 .channel(NioSocketChannel.class)
-                .handler(new LoggingHandler(LogLevel.DEBUG))
+                .handler(new LoggingHandler(LogLevel.INFO))
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
                         ch.pipeline().addLast(
-                                new IdleStateHandler(0, 0, 5),
+//                                new IdleStateHandler(0, 0, 5, TimeUnit.SECONDS),
                                 new StringEncoder(),
                                 new JsonObjectDecoder(),
                                 new ResponseMessageToMessage());
@@ -83,8 +82,8 @@ public abstract class AbstractClient {
                 channel.writeAndFlush(JSON.toJSONString(define));
                 log.info("Connect to server successfully!");
             } else {
-                log.warn("Failed to connect to server, try connect after 10s");
-                futureListener.channel().eventLoop().schedule(() -> doConnect(), 10, TimeUnit.SECONDS);
+                log.warn("Failed to connect to server, try connect after 3s");
+                futureListener.channel().eventLoop().schedule(() -> doConnect(), 3, TimeUnit.SECONDS);
             }
         });
     }
