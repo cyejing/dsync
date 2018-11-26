@@ -16,6 +16,7 @@ public class LockExample {
         DLock lock = dSync.getLock();
 
         lock.lock("adder");
+        //Do Something
         lock.unlock();
 
     }
