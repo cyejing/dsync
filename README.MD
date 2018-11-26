@@ -4,7 +4,7 @@
 3. 自定义协议,内置等待队列,性能远超redis锁.
 4. 服务下线立刻感知,无需等待超时.
 5. 支持优雅关闭.
-6. 规避Redis分布式锁缺陷: http://tech.dianwoda.com/2018/04/11/redisfen-bu-shi-suo-jin-hua-shi/
+6. 规避Redis分布式锁缺陷: http://zhangtielei.com/posts/blog-redlock-reasoning.html , http://zhangtielei.com/posts/blog-redlock-reasoning-part2.html
 
 
 ### 启动服务端
