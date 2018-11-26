@@ -35,7 +35,7 @@ public class DLockImpl implements DLock {
 
     @Override
     public void lock(String resource) {
-        long processId = syncGetProcessId(); //重启也要获得新的processId
+        long processId = syncGetProcessId(); 
         if (threadLocal.get() != null) {
             return;
         }

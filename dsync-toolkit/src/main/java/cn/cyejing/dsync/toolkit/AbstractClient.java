@@ -37,7 +37,6 @@ public abstract class AbstractClient {
     protected Bootstrap bootstrap;
     protected Channel channel;
 
-
     public AbstractClient(String host, int port) {
         this.host = host;
         this.port = port;
@@ -59,7 +58,13 @@ public abstract class AbstractClient {
                         initSocketChannel(ch);
                     }
                 });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown(), "DSync-JVM-shutdown-hook"));
     }
+
+    protected void shutdown() {
+        group.shutdownGracefully();
+    }
+
 
     protected abstract ChannelHandler[] getChannelHandlers();
 
