@@ -6,9 +6,12 @@ import cn.cyejing.dsync.toolkit.DSync;
 
 /**
  *
+ * JAVA代码方式使用
  * @author Born
  */
 public class LockExample {
+
+    private static int i = 0;
 
     public static void main(String[] args) {
         Config config = Config.config().host("localhost").port(4843);
@@ -16,6 +19,7 @@ public class LockExample {
         DLock lock = dSync.getLock();
 
         lock.lock("adder");
+        i++;
         //Do Something
         lock.unlock();
 

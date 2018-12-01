@@ -7,12 +7,13 @@
   <groupId>cn.cyejing</groupId>
   <artifactId>dsync</artifactId>
   <packaging>pom</packaging>
-  <version>0.1.3</version>
+  <version>0.1.4-SNAPSHOT</version>
   <modules>
     <module>dsync-toolkit</module>
     <module>dsync-dominate</module>
     <module>dsync-common</module>
     <module>dsync-example</module>
+    <module>dsync-spring-boot-starter</module>
   </modules>
 
   <name>dsync</name>

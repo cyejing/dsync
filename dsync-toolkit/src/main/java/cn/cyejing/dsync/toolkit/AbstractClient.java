@@ -51,7 +51,6 @@ public abstract class AbstractClient {
                     @Override
                     protected void initChannel(SocketChannel ch) {
                         ch.pipeline().addLast(
-//                                new IdleStateHandler(0, 0, 5, TimeUnit.SECONDS),
                                 new StringEncoder(),
                                 new JsonObjectDecoder(),
                                 new ResponseMessageToMessage());

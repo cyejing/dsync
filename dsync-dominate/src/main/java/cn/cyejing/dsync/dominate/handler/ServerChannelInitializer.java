@@ -20,13 +20,10 @@ public final class ServerChannelInitializer extends io.netty.channel.ChannelInit
     @Override
     public void initChannel(SocketChannel socketChannel) throws Exception {
         socketChannel.pipeline().addLast(
-//                new LoggingHandler(LogLevel.INFO),
-//                new IdleStateHandler(0, 0, 5, TimeUnit.SECONDS),
                 new JsonObjectDecoder(),
                 new StringEncoder(),
                 new ProtocolMessageToMessage(),
                 new LockServerHandler()
         );
-//        LockCarrier.getInstance().addLockInterceptor(new TraceLockInterceptor());
     }
 }
