@@ -18,7 +18,7 @@ import org.redisson.config.Config;
 public class RedissonLockTest {
     private int i = 0;
 
-    ExecutorService executorService = Executors.newFixedThreadPool(100);
+    ExecutorService executorService = Executors.newFixedThreadPool(10);
 
 
     @Test
