@@ -14,6 +14,7 @@
     <module>dsync-common</module>
     <module>dsync-example</module>
     <module>dsync-spring-boot-starter</module>
+    <module>dsync-integration-test</module>
   </modules>
 
   <name>dsync</name>
