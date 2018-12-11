@@ -18,10 +18,14 @@ public class LockExample {
         DSync dSync = DSync.create(config);
         DLock lock = dSync.getLock();
 
-        lock.lock("adder");
-        i++;
-        //Do Something
-        lock.unlock();
+        try {
+            lock.lock("adder");
+            i++;
+            //Do Something
+        } finally {
+            lock.unlock();
+        }
+
 
     }
 

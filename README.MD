@@ -26,6 +26,10 @@ Config config = Config.config().host("localhost").port(4843); //配置服务端�
 DSync dSync = DSync.create(config);
 DLock lock = dSync.getLock();
 
-lock.lock("adder");
-lock.unlock();
+try {
+    lock.lock("adder");
+    //Do Something
+} finally {
+    lock.unlock();
+}
 ```
