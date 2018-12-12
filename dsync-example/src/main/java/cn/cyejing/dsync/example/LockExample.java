@@ -26,6 +26,8 @@ public class LockExample {
             lock.unlock();
         }
 
+        //关闭netty线程,进程退出
+        lock.shutdown();
 
     }
 

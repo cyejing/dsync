@@ -77,6 +77,11 @@ public class DLockImpl implements DLock {
         client.request(request);
     }
 
+    @Override
+    public void shutdown() {
+        client.shutdown();
+    }
+
     void revisionProcessId(long serverProcessId) {
         this.processId = serverProcessId;
         initProcessLatch.countDown();

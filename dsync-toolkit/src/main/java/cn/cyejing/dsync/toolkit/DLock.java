@@ -10,4 +10,5 @@ public interface DLock {
 
     void unlock();
 
+    void shutdown();
 }

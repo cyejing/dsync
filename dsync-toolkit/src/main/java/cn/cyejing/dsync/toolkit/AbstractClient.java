@@ -10,7 +10,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -19,12 +18,10 @@ import io.netty.handler.codec.json.JsonObjectDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.timeout.IdleStateHandler;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- *
  * @author Born
  */
 @Slf4j
@@ -43,7 +40,7 @@ public abstract class AbstractClient {
     }
 
     protected void bootstrap() {
-        group = new NioEventLoopGroup();
+        group = new NioEventLoopGroup(10);
         bootstrap = new Bootstrap().group(group)
                 .channel(NioSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
@@ -60,7 +57,7 @@ public abstract class AbstractClient {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown(), "DSync-JVM-shutdown-hook"));
     }
 
-    protected void shutdown() {
+    public void shutdown() {
         group.shutdownGracefully();
     }
 
