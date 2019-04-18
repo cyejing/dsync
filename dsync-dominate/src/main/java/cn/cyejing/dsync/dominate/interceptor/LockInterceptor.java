@@ -15,4 +15,6 @@ public interface LockInterceptor {
     void release(Operate currentOperate,Operate nextOperate);
 
     void processDown(Process process, List<Operate> operates);
+
+    void tryAcquire(Operate operate, boolean acquire);
 }

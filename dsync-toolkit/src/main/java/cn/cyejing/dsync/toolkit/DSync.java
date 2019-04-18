@@ -9,7 +9,7 @@ import cn.cyejing.dsync.toolkit.lock.DLockImpl;
 public class DSync {
 
     private final Config config;
-    private DLock lock;
+    private volatile DLock lock;
 
     public DSync(Config config) {
         this.config = config;

@@ -5,12 +5,10 @@ import cn.cyejing.dsync.common.model.Response;
 import cn.cyejing.dsync.toolkit.AbstractClient;
 import cn.cyejing.dsync.toolkit.Config;
 import com.alibaba.fastjson.JSON;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 public class DLockClient extends AbstractClient {
 
     private DLockImpl lock;
+    private ConcurrentHashMap<Long, ResponseFuture> responseMap = new ConcurrentHashMap<>();
+
     public DLockClient(String host, int port, DLockImpl lock) {
         super(host, port);
         this.lock = lock;
@@ -35,15 +35,13 @@ public class DLockClient extends AbstractClient {
         this(config.getHost(), config.getPort(), lock);
     }
 
-    public void request(Request request) {
+    public ResponseFuture request(Request request) {
+        long lockId = request.getLockId();
+        ResponseFuture responseFuture = new ResponseFuture(lockId);
         channel.writeAndFlush(JSON.toJSONString(request));
+        responseMap.put(lockId, responseFuture);
+        return responseFuture;
     }
-
-    @Override
-    protected ChannelHandler[] getChannelHandlers() {
-        return new ChannelHandler[]{new LockHandler(lock)};
-    }
-
     @Override
     protected void initSocketChannel(SocketChannel channel) {
         channel.pipeline().addLast(new LockHandler(lock));
@@ -65,7 +63,14 @@ public class DLockClient extends AbstractClient {
                     break;
                 }
                 case Unlock: {
+                    ResponseFuture responseFuture = responseMap.remove(res.getLockId());
+                        responseFuture.haveResponse(res);
                     lock.countDown(res.getLockId(), res.getResource());
+                    break;
+                }
+                case TryLock:{
+                    ResponseFuture responseFuture = responseMap.remove(res.getLockId());
+                    responseFuture.haveResponse(res);
                     break;
                 }
                 default: {

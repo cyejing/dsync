@@ -19,7 +19,6 @@ public class CharsetUtil {
         char c;
         for (int i = 0; i < length; i++) {
             if((c = byteBuf.readChar()) != 0){
-                System.out.println(c);
                 builder.append(c);
             }
         }

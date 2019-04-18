@@ -38,4 +38,9 @@ public class TraceLockInterceptor implements LockInterceptor {
     public void processDown(Process process, List<Operate> operates) {
         logLockCarrier();
     }
+
+    @Override
+    public void tryAcquire(Operate operate, boolean acquire) {
+        logLockCarrier();
+    }
 }

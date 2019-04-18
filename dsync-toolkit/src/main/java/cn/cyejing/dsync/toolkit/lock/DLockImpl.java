@@ -1,11 +1,15 @@
 package cn.cyejing.dsync.toolkit.lock;
 
 import cn.cyejing.dsync.common.model.Request;
+import cn.cyejing.dsync.common.model.Response;
+import cn.cyejing.dsync.common.model.ResponseCode;
 import cn.cyejing.dsync.common.model.Steps;
 import cn.cyejing.dsync.toolkit.Config;
 import cn.cyejing.dsync.toolkit.DLock;
+import io.netty.channel.ChannelFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,6 +26,7 @@ public class DLockImpl implements DLock {
     private volatile CountDownLatch initProcessLatch = new CountDownLatch(1);
 
     private ConcurrentHashMap<String, CountDownLatch> localLock = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Response> localResponse = new ConcurrentHashMap<>();
     private ThreadLocal<Request> threadLocal = new ThreadLocal<>();
     private AtomicLong lockIdAdder = new AtomicLong(1);
 
@@ -31,6 +36,34 @@ public class DLockImpl implements DLock {
 
     public void init() {
         client.connect();
+    }
+
+    @Override
+    public boolean tryLock(String resource) {
+        long processId = syncGetProcessId();
+        if (threadLocal.get() != null) {
+            return true;
+        }
+        long lockId = createLockId();
+        String key = lockId + "-" + resource;
+        log.debug("put latch of key:{}", key);
+        CountDownLatch latch = new CountDownLatch(1);
+        localLock.put(key, latch);
+
+        Request request = new Request(processId, lockId, Steps.TryLock, resource);
+        threadLocal.set(request);
+        ResponseFuture responseFuture = client.request(request);
+
+        try {
+            log.debug("lock key:{}", key);
+            Response response = responseFuture.get();
+            return ResponseCode.Ok.equals(response.getCode());
+        } catch (InterruptedException e) {
+            localLock.remove(key);
+            threadLocal.remove();
+            log.error("lock is interrupted", e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -80,6 +113,7 @@ public class DLockImpl implements DLock {
     @Override
     public void shutdown() {
         client.shutdown();
+        initProcessLatch.countDown();
     }
 
     void revisionProcessId(long serverProcessId) {

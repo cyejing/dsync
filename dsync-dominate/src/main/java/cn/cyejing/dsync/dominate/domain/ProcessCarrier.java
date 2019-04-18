@@ -49,7 +49,7 @@ public class ProcessCarrier {
     }
 
     public void addProcessLockOperate(Operate operate) {
-        log.debug("add resource of operate:{}", operate);
+        log.info("add resource of Lock operate:{}", operate);
         if (operate != null) {
             Process process = processIdMap.get(operate.getProcessId());
             if (process != null) {
@@ -59,7 +59,7 @@ public class ProcessCarrier {
     }
 
     public void removeProcessLockOperate(Operate operate) {
-        log.debug("remove resource of operate:{}", operate);
+        log.info("remove resource of operate:{}", operate);
         if (operate != null) {
             Process process = processIdMap.get(operate.getProcessId());
             if (process != null) {
@@ -69,7 +69,7 @@ public class ProcessCarrier {
     }
 
     public void addProcessOperate(Operate operate) {
-        log.debug("add resource of operate:{}", operate);
+        log.info("add resource of operate:{}", operate);
         if (operate != null) {
             Process process = processIdMap.get(operate.getProcessId());
             if (process != null) {
@@ -79,7 +79,7 @@ public class ProcessCarrier {
     }
 
     public void removeProcessOperate(Operate operate) {
-        log.debug("remove resource of operate:{}", operate);
+        log.info("remove resource of operate:{}", operate);
         if (operate != null) {
             Process process = processIdMap.get(operate.getProcessId());
             if (process != null) {

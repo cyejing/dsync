@@ -32,4 +32,12 @@ public class ProcessPostLockInterceptor implements LockInterceptor {
     public void processDown(Process process, List<Operate> operates) {
         processCarrier.removeProcess(process);
     }
+
+    @Override
+    public void tryAcquire(Operate operate, boolean lock) {
+        if (lock) {
+            processCarrier.addProcessLockOperate(operate);
+        }
+        processCarrier.addProcessOperate(operate);
+    }
 }

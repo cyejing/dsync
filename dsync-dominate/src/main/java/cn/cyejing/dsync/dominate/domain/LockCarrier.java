@@ -31,9 +31,23 @@ public class LockCarrier {
         return lockCarrier;
     }
 
+    public boolean tryAcquire(Operate operate) {
+        String resource = operate.getResource();
+        log.info("try acquire resource:{},operate:{}", resource, operate);
+        Lock lock = lockMap.get(resource);
+        if (lock == null) {
+            lockMap.putIfAbsent(resource, new Lock());
+            lock = lockMap.get(resource);
+        }
+        boolean acquire = lock.tryAcquire(operate);
+        lockInterceptors.forEach(i -> i.tryAcquire(operate, acquire));
+        return acquire;
+    }
+    
+
     public boolean acquire(Operate operate) {
         String resource = operate.getResource();
-        log.debug("acquire resource:{},operate:{}", resource, operate);
+        log.info("acquire resource:{},operate:{}", resource, operate);
 
         Lock lock = lockMap.get(resource);
         if (lock == null) {
@@ -47,7 +61,7 @@ public class LockCarrier {
 
     public Operate release(Operate operate) {
         String resource = operate.getResource();
-        log.debug("release resource:{}", resource);
+        log.info("release resource:{}", resource);
         Lock lock = lockMap.get(resource);
         Operate currentOperate = lock.getCurrentOperate();
         if (currentOperate != null && currentOperate.equals(operate)) {
@@ -59,7 +73,7 @@ public class LockCarrier {
     }
 
     public List<Operate> processRelease(Process process) {
-        log.debug("precess is down. process:{}", process);
+        log.info("precess is down. process:{}", process);
         process.Inactive();
         List<Operate> releaseSet = new ArrayList<>();
         List<Operate> operates = process.getLockOperates();

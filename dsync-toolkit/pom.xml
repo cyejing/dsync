@@ -17,7 +17,6 @@
   <dependency>
     <groupId>cn.cyejing</groupId>
     <artifactId>dsync-common</artifactId>
-    <version>0.1.4-SNAPSHOT</version>
   </dependency>
 
 </dependencies>

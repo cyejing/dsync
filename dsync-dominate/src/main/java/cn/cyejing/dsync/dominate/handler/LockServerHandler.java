@@ -39,6 +39,15 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
                 channel.writeAndFlush(JSON.toJSONString(response));
                 break;
             }
+            case TryLock:{
+                Channel channel = ctx.channel();
+                Operate operate = new Operate(req.getProcessId(), req.getLockId(), req.getResource(), channel);
+                boolean tryAcquire = lockCarrier.tryAcquire(operate);
+                Response response = new Response(Steps.TryLock, operate.getProcessId(), operate.getLockId(),
+                        operate.getResource(), tryAcquire ? ResponseCode.Ok : ResponseCode.Fail);
+                channel.writeAndFlush(JSON.toJSONString(response));
+                break;
+            }
             case Lock: {
                 Channel channel = ctx.channel();
                 Operate operate = new Operate(req.getProcessId(), req.getLockId(), req.getResource(), channel);
@@ -57,7 +66,7 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
             case Close:
                 break;
             default: {
-                log.debug("ignore unknown operate:{}", req.getOperate());
+                log.info("ignore unknown operate:{}", req.getOperate());
                 Response response = new Response(req.getOperate(), -1L, -1L, null, ResponseCode.Fail);
                 response.setMessage("unknown the operate:" + req.getOperate());
                 ctx.writeAndFlush(JSON.toJSONString(response));
@@ -98,7 +107,7 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
         super.channelInactive(ctx);
         log.info("channelInactive:{}", ctx.channel());
         Channel channel = ctx.channel();
-        Process process = processCarrier.get(channel);
+        Process process = processCarrier.get(channel);//TODO null
         List<Operate> operates = lockCarrier.processRelease(process);
         operates.forEach(o -> writeUnlock(o));
     }

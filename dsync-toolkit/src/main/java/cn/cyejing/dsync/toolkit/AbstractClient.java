@@ -18,6 +18,8 @@ import io.netty.handler.codec.json.JsonObjectDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.concurrent.DefaultThreadFactory;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +42,7 @@ public abstract class AbstractClient {
     }
 
     protected void bootstrap() {
-        group = new NioEventLoopGroup(10);
+        group = new NioEventLoopGroup(10,new DefaultThreadFactory("dsync-client"));
         bootstrap = new Bootstrap().group(group)
                 .channel(NioSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
@@ -48,6 +50,7 @@ public abstract class AbstractClient {
                     @Override
                     protected void initChannel(SocketChannel ch) {
                         ch.pipeline().addLast(
+                                new LoggingHandler(LogLevel.DEBUG),
                                 new StringEncoder(),
                                 new JsonObjectDecoder(),
                                 new ResponseMessageToMessage());
@@ -61,8 +64,6 @@ public abstract class AbstractClient {
         group.shutdownGracefully();
     }
 
-
-    protected abstract ChannelHandler[] getChannelHandlers();
 
     public AbstractClient(Config config) {
         this(config.getHost(), config.getPort());

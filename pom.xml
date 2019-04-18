@@ -42,7 +42,7 @@
   </developers>
 
   <properties>
-    <current.version>1.0.1</current.version>
+    <current.version>0.1.4-SNAPSHOT</current.version>
     <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -58,6 +58,36 @@
        <groupId>io.netty</groupId>
        <artifactId>netty-all</artifactId>
        <version>${netty.version}</version>
+     </dependency>
+     <dependency>
+       <groupId>cn.cyejing</groupId>
+       <artifactId>dsync-dominate</artifactId>
+       <version>${current.version}</version>
+     </dependency>
+     <dependency>
+       <groupId>cn.cyejing</groupId>
+       <artifactId>dsync-toolkit</artifactId>
+       <version>${current.version}</version>
+     </dependency>
+     <dependency>
+       <groupId>cn.cyejing</groupId>
+       <artifactId>dsync-common</artifactId>
+       <version>${current.version}</version>
+     </dependency>
+     <dependency>
+       <groupId>cn.cyejing</groupId>
+       <artifactId>dsync-spring-boot-starter</artifactId>
+       <version>${current.version}</version>
+     </dependency>
+     <dependency>
+       <groupId>cn.cyejing</groupId>
+       <artifactId>dsync-example</artifactId>
+       <version>${current.version}</version>
+     </dependency>
+     <dependency>
+       <groupId>cn.cyejing</groupId>
+       <artifactId>dsync-integration-test</artifactId>
+       <version>${current.version}</version>
      </dependency>
    </dependencies>
  </dependencyManagement>
@@ -98,7 +128,7 @@
                   <goal>jar</goal>
                 </goals>
                 <configuration>
-                  <additionalOptions>-Xdoclint:none</additionalOptions>
+                  <!--<additionalOptions>-Xdoclint:none</additionalOptions>-->
                   <!--<additionalparam>-Xdoclint:none</additionalparam>-->
                 </configuration>
               </execution>
@@ -109,14 +139,14 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
             <version>1.6</version>
-            <executions>
-              <execution>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<phase>verify</phase>-->
+                <!--<goals>-->
+                  <!--<goal>sign</goal>-->
+                <!--</goals>-->
+              <!--</execution>-->
+            <!--</executions>-->
           </plugin>
         </plugins>
       </build>

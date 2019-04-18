@@ -12,10 +12,16 @@
   <artifactId>dsync-integration-test</artifactId>
 
   <dependencies>
+
     <dependency>
       <groupId>cn.cyejing</groupId>
       <artifactId>dsync-toolkit</artifactId>
-      <version>0.1.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>cn.cyejing</groupId>
+      <artifactId>dsync-dominate</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -47,5 +53,6 @@
       <version>3.9.0</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 </project>

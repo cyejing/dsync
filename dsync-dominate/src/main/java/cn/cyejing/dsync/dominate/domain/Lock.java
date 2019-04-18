@@ -43,4 +43,13 @@ public class Lock {
     public synchronized Operate getCurrentOperate() {
         return currentOperate;
     }
+
+    public boolean tryAcquire(Operate operate) {
+        if (currentOperate == null) {
+            currentOperate = operate;
+            return true;
+        }else{
+            return false;
+        }
+    }
 }

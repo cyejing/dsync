@@ -19,7 +19,7 @@ public class LockExample {
         DLock lock = dSync.getLock();
 
         try {
-            lock.lock("adder");
+            lock.lock("adder1");
             i++;
             //Do Something
         } finally {

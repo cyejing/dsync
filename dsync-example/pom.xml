@@ -32,7 +32,6 @@
     <dependency>
       <groupId>cn.cyejing</groupId>
       <artifactId>dsync-spring-boot-starter</artifactId>
-      <version>0.1.4-SNAPSHOT</version>
     </dependency>
   </dependencies>
 

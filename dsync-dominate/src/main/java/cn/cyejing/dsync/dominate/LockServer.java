@@ -1,25 +1,22 @@
 package cn.cyejing.dsync.dominate;
 
-import cn.cyejing.dsync.dominate.domain.ProcessCarrier;
 import cn.cyejing.dsync.dominate.handler.ServerChannelInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import java.util.concurrent.TimeUnit;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Born
  */
 @Slf4j
-public class ServerMain {
+public class LockServer {
 
 
     public static void main(String[] args) throws InterruptedException {
@@ -27,8 +24,13 @@ public class ServerMain {
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
         }
+        LockServer lockServer = new LockServer();
+        lockServer.start(port);
+    }
+
+    public void start(int port) throws InterruptedException {
         EventLoopGroup bossEventLoopGroup = new NioEventLoopGroup(5);
-        EventLoopGroup workerEventLoopGroup = new NioEventLoopGroup(10);
+        EventLoopGroup workerEventLoopGroup = new NioEventLoopGroup(10,new DefaultThreadFactory("dsync-server"));
         try {
             Channel channel = new ServerBootstrap()
                     .group(bossEventLoopGroup, workerEventLoopGroup)
