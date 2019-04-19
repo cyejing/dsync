@@ -25,8 +25,6 @@ public class DLockImpl implements DLock {
     private volatile long processId;
     private volatile CountDownLatch initProcessLatch = new CountDownLatch(1);
 
-    private ConcurrentHashMap<String, CountDownLatch> localLock = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, Response> localResponse = new ConcurrentHashMap<>();
     private ThreadLocal<Request> threadLocal = new ThreadLocal<>();
     private AtomicLong lockIdAdder = new AtomicLong(1);
 
@@ -40,26 +38,27 @@ public class DLockImpl implements DLock {
 
     @Override
     public boolean tryLock(String resource) {
+        log.debug("try lock resource:{}", resource);
         long processId = syncGetProcessId();
         if (threadLocal.get() != null) {
             return true;
         }
         long lockId = createLockId();
-        String key = lockId + "-" + resource;
-        log.debug("put latch of key:{}", key);
-        CountDownLatch latch = new CountDownLatch(1);
-        localLock.put(key, latch);
 
         Request request = new Request(processId, lockId, Steps.TryLock, resource);
         threadLocal.set(request);
         ResponseFuture responseFuture = client.request(request);
 
         try {
-            log.debug("lock key:{}", key);
             Response response = responseFuture.get();
+            log.debug("try lock resource is:{}", response);
+            if (this.processId == 0) {
+                log.warn("channel is inactive, try connect...");
+                threadLocal.remove();
+                return false;
+            }
             return ResponseCode.Ok.equals(response.getCode());
         } catch (InterruptedException e) {
-            localLock.remove(key);
             threadLocal.remove();
             log.error("lock is interrupted", e);
             throw new RuntimeException(e);
@@ -68,30 +67,26 @@ public class DLockImpl implements DLock {
 
     @Override
     public void lock(String resource) {
-        long processId = syncGetProcessId(); 
+        log.debug("lock resource:{}", resource);
+        long processId = syncGetProcessId();
         if (threadLocal.get() != null) {
             return;
         }
         long lockId = createLockId();
-        String key = lockId + "-" + resource;
-        log.debug("put latch of key:{}", key);
-        CountDownLatch latch = new CountDownLatch(1);
-        localLock.put(key, latch);
+
 
         Request request = new Request(processId, lockId, Steps.Lock, resource);
         threadLocal.set(request);
-        client.request(request);
+        ResponseFuture responseFuture = client.request(request);
         try {
-            log.debug("lock key:{}", key);
-            latch.await();
+            responseFuture.get();
+            log.debug("get lock resource:{}", resource);
             if (this.processId == 0) {
                 log.warn("channel is inactive, try connect...");
-                localLock.remove(key);
                 threadLocal.remove();
                 lock(resource); // recycle lock ,waiting server...
             }
         } catch (InterruptedException e) {
-            localLock.remove(key);
             threadLocal.remove();
             log.error("lock is interrupted", e);
             throw new RuntimeException(e);
@@ -107,7 +102,8 @@ public class DLockImpl implements DLock {
         }
         request.setOperate(Steps.Unlock);
         threadLocal.remove();
-        client.request(request);
+        log.debug("unlock request:{}", request);
+        client.unlock(request);
     }
 
     @Override
@@ -122,28 +118,19 @@ public class DLockImpl implements DLock {
         log.info("connection server success and revision processId:{}", this.processId);
     }
 
-    void countDown(long lockId, String resource) {
-        String key = lockId + "-" + resource;
-        CountDownLatch latch = localLock.get(key);
-        log.debug("count down key:{}, count:{}", key, latch);
-        if (latch != null) {
-            latch.countDown();
-            localLock.remove(key);
-        }
-    }
-
     void serverBreak() {
         this.processId = 0;
         this.initProcessLatch = new CountDownLatch(1);
-        localLock.values().forEach(latch -> latch.countDown());
-        localLock.clear();
     }
 
     private long syncGetProcessId() {
         try {
             if (this.processId == 0) {
                 log.debug("waiting for server response process  id");
-                initProcessLatch.await();
+                boolean await = initProcessLatch.await(10, TimeUnit.SECONDS);
+                if (await == false) {
+                    throw new RuntimeException("wait lock server timeout, check server status");
+                }
             }
         } catch (InterruptedException e) {
             log.error("waiting for process  is interrupted", e);

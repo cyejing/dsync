@@ -36,6 +36,20 @@ public class LockCarrierTest {
     }
 
     @Test
+    public void testTryAcquire() {
+        Operate operate = new Operate(1L, 1L, "asd", channel);
+        assertTrue(lockCarrier.tryAcquire(operate));
+        assertFalse(lockCarrier.tryAcquire(operate));
+        lockCarrier.release(operate);
+        assertTrue(lockCarrier.tryAcquire(operate));
+        assertFalse(lockCarrier.acquire(operate));
+        lockCarrier.release(operate);
+        assertFalse(lockCarrier.tryAcquire(operate));
+        lockCarrier.release(operate);
+        assertTrue(lockCarrier.tryAcquire(operate));
+    }
+
+    @Test
     public void testProcessRelease() {
         EmbeddedChannel channel1 = new EmbeddedChannel(DefaultChannelId.newInstance());
         EmbeddedChannel channel2 = new EmbeddedChannel(DefaultChannelId.newInstance());

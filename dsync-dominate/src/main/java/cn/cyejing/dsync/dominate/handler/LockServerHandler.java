@@ -75,7 +75,7 @@ public class LockServerHandler extends SimpleChannelInboundHandler<Request> {
     }
 
     private void writeUnlock(Operate nextOperate) {
-        log.debug("writeUnlock next operate:{}", nextOperate);
+        log.debug("unlock next operate:{}", nextOperate);
         if (nextOperate != null) {
             Channel nextOperatorChannel = nextOperate.getChannel();
             Response response = new Response(Steps.Unlock, nextOperate.getProcessId(), nextOperate.getLockId(),

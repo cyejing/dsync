@@ -30,7 +30,7 @@ public class ProcessCarrier {
     }
 
     public void addProcess(Process process){
-        log.info("add process to carrier:{}", process);
+        log.debug("register process:{}", process);
         processIdMap.put(process.getProcessId(), process);
         processChannelMap.put(process.getChannel().id(), process);
     }
@@ -49,7 +49,7 @@ public class ProcessCarrier {
     }
 
     public void addProcessLockOperate(Operate operate) {
-        log.info("add resource of Lock operate:{}", operate);
+        log.debug("process register lock operate:{}", operate);
         if (operate != null) {
             Process process = processIdMap.get(operate.getProcessId());
             if (process != null) {
@@ -59,7 +59,7 @@ public class ProcessCarrier {
     }
 
     public void removeProcessLockOperate(Operate operate) {
-        log.info("remove resource of operate:{}", operate);
+        log.debug("process remove lock operate:{}", operate);
         if (operate != null) {
             Process process = processIdMap.get(operate.getProcessId());
             if (process != null) {
@@ -69,7 +69,7 @@ public class ProcessCarrier {
     }
 
     public void addProcessOperate(Operate operate) {
-        log.info("add resource of operate:{}", operate);
+        log.debug("process register operate:{}", operate);
         if (operate != null) {
             Process process = processIdMap.get(operate.getProcessId());
             if (process != null) {
@@ -79,7 +79,7 @@ public class ProcessCarrier {
     }
 
     public void removeProcessOperate(Operate operate) {
-        log.info("remove resource of operate:{}", operate);
+        log.debug("process remove operate:{}", operate);
         if (operate != null) {
             Process process = processIdMap.get(operate.getProcessId());
             if (process != null) {
@@ -89,12 +89,17 @@ public class ProcessCarrier {
     }
 
     public void removeProcess(Process process) {
-        log.info("process have remove:{}", process);
         processIdMap.remove(process.getProcessId());
         processChannelMap.remove(process.getChannel().id());
     }
 
     public Map<ChannelId,Process> peekProcessMap() {
         return Collections.unmodifiableMap(processChannelMap);
+    }
+
+    public void clear() {
+        processIdMap.clear();
+        processChannelMap.clear();
+        processIdAdder.set(1);
     }
 }

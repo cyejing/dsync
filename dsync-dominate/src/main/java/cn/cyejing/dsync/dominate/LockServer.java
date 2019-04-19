@@ -1,5 +1,7 @@
 package cn.cyejing.dsync.dominate;
 
+import cn.cyejing.dsync.dominate.domain.LockCarrier;
+import cn.cyejing.dsync.dominate.domain.ProcessCarrier;
 import cn.cyejing.dsync.dominate.handler.ServerChannelInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -18,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LockServer {
 
+    EventLoopGroup bossEventLoopGroup = new NioEventLoopGroup(5);
+    EventLoopGroup workerEventLoopGroup = new NioEventLoopGroup(10,new DefaultThreadFactory("dsync-server"));
 
     public static void main(String[] args) throws InterruptedException {
         int port = 4843;
@@ -29,8 +33,7 @@ public class LockServer {
     }
 
     public void start(int port) throws InterruptedException {
-        EventLoopGroup bossEventLoopGroup = new NioEventLoopGroup(5);
-        EventLoopGroup workerEventLoopGroup = new NioEventLoopGroup(10,new DefaultThreadFactory("dsync-server"));
+
         try {
             Channel channel = new ServerBootstrap()
                     .group(bossEventLoopGroup, workerEventLoopGroup)
@@ -43,8 +46,14 @@ public class LockServer {
 
             channel.closeFuture().sync();
         } finally {
-            bossEventLoopGroup.shutdownGracefully();
-            workerEventLoopGroup.shutdownGracefully();
+          shutdown();
         }
+    }
+
+    public void shutdown() {
+        bossEventLoopGroup.shutdownGracefully();
+        workerEventLoopGroup.shutdownGracefully();
+        LockCarrier.getInstance().clear();
+        ProcessCarrier.getInstance().clear();
     }
 }

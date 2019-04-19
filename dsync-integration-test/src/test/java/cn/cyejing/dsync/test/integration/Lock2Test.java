@@ -40,12 +40,13 @@ public class Lock2Test extends LockServerInit{
          * 10c 5000n 15413ms
          * 10c 10000n 29734ms
          */
-        CountDownLatch latch1 = new CountDownLatch(5000);
-        CountDownLatch latch2 = new CountDownLatch(500);
-        CountDownLatch latch3 = new CountDownLatch(500);
+
         int count = 5000;
-        int count2 = 500;
-        int count3 = 500;
+        int count2 = 3000;
+        int count3 = 1000;
+        CountDownLatch latch1 = new CountDownLatch(count);
+        CountDownLatch latch2 = new CountDownLatch(count2);
+        CountDownLatch latch3 = new CountDownLatch(count3);
 
 
         long start = System.currentTimeMillis();
@@ -54,23 +55,26 @@ public class Lock2Test extends LockServerInit{
             executorService.submit(() -> {
                 lock.lock("adder");
                 i++;
+
                 latch1.countDown();
                 lock.unlock();
-                if (latch1.getCount() == 1000) { //开启第2个
+                if (latch1.getCount() == 100) { //开启第2个
                     log.info("begin2 1:{}, 2:{}, 3,{}",latch1.getCount(),latch2.getCount(),latch3.getCount());
                     for (int m = 0; m < count2; m++) {
                         executorService2.submit(() -> {
                             lock2.lock("adder");
                             i++;
+
                             latch2.countDown();
                             lock2.unlock();
-                            if (latch2.getCount() == 300) { //开启第3个
+                            if (latch2.getCount() == 100) { //开启第3个
                                 log.info("begin3 1:{}, 2:{}, 3,{}",latch1.getCount(),latch2.getCount(),latch3.getCount());
                                 DLock lock3 = DSync.create(new Config().host("localhost").port(4843)).getLock();
                                 for (int k = 0; k < count3; k++) {
                                     executorService3.submit(() -> {
                                         lock3.lock("adder");
                                         i++;
+
                                         latch3.countDown();
                                         lock3.unlock();
                                         if (latch3.getCount() == 0) {

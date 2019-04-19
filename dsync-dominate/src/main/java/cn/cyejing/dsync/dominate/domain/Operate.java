@@ -55,4 +55,5 @@ public class Operate {
     public void Inactive() {
         this.active = false;
     }
+
 }

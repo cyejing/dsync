@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DLockClient extends AbstractClient {
 
     private DLockImpl lock;
-    private ConcurrentHashMap<Long, ResponseFuture> responseMap = new ConcurrentHashMap<>();
+    private volatile ConcurrentHashMap<Long, ResponseFuture> responseMap = new ConcurrentHashMap<>();
 
     public DLockClient(String host, int port, DLockImpl lock) {
         super(host, port);
@@ -37,10 +37,14 @@ public class DLockClient extends AbstractClient {
 
     public ResponseFuture request(Request request) {
         long lockId = request.getLockId();
-        ResponseFuture responseFuture = new ResponseFuture(lockId);
-        channel.writeAndFlush(JSON.toJSONString(request));
+        ResponseFuture responseFuture = new ResponseFuture(request);
         responseMap.put(lockId, responseFuture);
+        channel.writeAndFlush(JSON.toJSONString(request));
         return responseFuture;
+    }
+
+    public void unlock(Request request) {
+        channel.writeAndFlush(JSON.toJSONString(request));
     }
     @Override
     protected void initSocketChannel(SocketChannel channel) {
@@ -64,8 +68,7 @@ public class DLockClient extends AbstractClient {
                 }
                 case Unlock: {
                     ResponseFuture responseFuture = responseMap.remove(res.getLockId());
-                        responseFuture.haveResponse(res);
-                    lock.countDown(res.getLockId(), res.getResource());
+                    responseFuture.haveResponse(res);
                     break;
                 }
                 case TryLock:{
@@ -108,6 +111,9 @@ public class DLockClient extends AbstractClient {
             log.info("channelInactive:{}", ctx.channel());
             super.channelInactive(ctx);
             lock.serverBreak();
+            responseMap.values().forEach(v->{
+                v.inactive();
+            });
             doConnect();
         }
 

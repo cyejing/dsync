@@ -3,6 +3,7 @@ package cn.cyejing.dsync.test.integration;
 import cn.cyejing.dsync.toolkit.Config;
 import cn.cyejing.dsync.toolkit.DLock;
 import cn.cyejing.dsync.toolkit.DSync;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +24,7 @@ public class LockTest extends LockServerInit{
 
     @Test
     public void testLock() throws Exception {
-        DSync dSync = DSync.create(new Config().host("localhost").port(4843));
-        DLock lock = dSync.getLock();
+        DLock lock = DSync.create(new Config().host("localhost").port(4843)).getLock();
         /**
          * 5c 1000n 3462ms
          * 10c 1000n 3536ms

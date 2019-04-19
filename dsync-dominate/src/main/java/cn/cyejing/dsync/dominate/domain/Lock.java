@@ -44,7 +44,7 @@ public class Lock {
         return currentOperate;
     }
 
-    public boolean tryAcquire(Operate operate) {
+    public synchronized boolean tryAcquire(Operate operate) {
         if (currentOperate == null) {
             currentOperate = operate;
             return true;

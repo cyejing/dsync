@@ -163,4 +163,19 @@
     </profile>
   </profiles>
 
+  <distributionManagement>
+    <repository>
+      <id>${nexus.release.id}</id>
+      <name>Internal Releases</name>
+      <url>${nexus.release.location}</url>
+    </repository>
+    <snapshotRepository>
+      <id>${nexus.snapshot.id}</id>
+      <name>Development Snapshot</name>
+      <url>${nexus.snapshot.location}</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+
+
 </project>
