@@ -21,11 +21,16 @@ public class LockTest extends LockServerInit {
     private int i = 0;
 
     ExecutorService executorService = Executors.newFixedThreadPool(10);
+    private int port = 4845;
 
+    @Override
+    public int getPort() {
+        return port;
+    }
 
     @Test
     public void testLock() throws Exception {
-        DLock lock = DSync.create(new Config().host("localhost").port(4843)).getLock();
+        DLock lock = DSync.create(new Config().host("localhost").port(port)).getLock();
         /**
          * 5c 1000n 3462ms
          * 10c 1000n 3536ms
@@ -60,7 +65,7 @@ public class LockTest extends LockServerInit {
     @Test
     public void testStep() throws InterruptedException {
 
-        DSync dSync = DSync.create(new Config().host("localhost").port(4843));
+        DSync dSync = DSync.create(new Config().host("localhost").port(port));
         DLock lock = dSync.getLock();
 
         CountDownLatch latch = new CountDownLatch(1);

@@ -21,7 +21,7 @@ public class RedissonLockTest {
     ExecutorService executorService = Executors.newFixedThreadPool(10);
 
 
-    @Test
+//    @Test
     public void testLock() throws Exception {
         /**
          * 5c 1000n 4812ms

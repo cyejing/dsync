@@ -13,11 +13,16 @@ public class LockServerInit {
         LockServer lockServer = new LockServer();
         new Thread(() -> {
             try {
-                lockServer.start(4843);
+                lockServer.start(getPort());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
     }
+
+    public int getPort() {
+        return 4843;
+    }
+
 
 }

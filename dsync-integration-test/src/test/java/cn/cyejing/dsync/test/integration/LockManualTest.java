@@ -22,15 +22,15 @@ public class LockManualTest {
 
     private final static ExecutorService executorService = Executors.newFixedThreadPool(10);
 
-    @Test
+//    @Test
     public void test1() throws Exception {
         testLock();
     }
-    @Test
+//    @Test
     public void test2() throws Exception {
         testLock();
     }
-    @Test
+//    @Test
     public void test3() throws Exception {
         testLock();
     }

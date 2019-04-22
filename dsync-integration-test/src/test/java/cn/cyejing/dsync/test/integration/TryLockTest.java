@@ -21,13 +21,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TryLockTest extends LockServerInit {
 
     private int i = 0;
+    private int port = 4846;
 
+    @Override
+    public int getPort() {
+        return port;
+    }
     ExecutorService executorService = Executors.newFixedThreadPool(10);
 
 
     @Test
     public void testLock() throws Exception {
-        DSync dSync = DSync.create(new Config().host("localhost").port(4843));
+        DSync dSync = DSync.create(new Config().host("localhost").port(port));
         DLock lock = dSync.getLock();
         /**
          * 5c 1000n 3462ms
@@ -72,7 +77,7 @@ public class TryLockTest extends LockServerInit {
     @Test
     public void testStep() throws InterruptedException {
 
-        DSync dSync = DSync.create(new Config().host("localhost").port(4843));
+        DSync dSync = DSync.create(new Config().host("localhost").port(port));
         DLock lock = dSync.getLock();
 
         CountDownLatch latch = new CountDownLatch(1);
