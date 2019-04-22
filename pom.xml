@@ -7,7 +7,7 @@
   <groupId>cn.cyejing</groupId>
   <artifactId>dsync</artifactId>
   <packaging>pom</packaging>
-  <version>0.1.4-SNAPSHOT</version>
+  <version>0.2.0</version>
   <modules>
     <module>dsync-toolkit</module>
     <module>dsync-dominate</module>
@@ -42,7 +42,7 @@
   </developers>
 
   <properties>
-    <current.version>0.1.4-SNAPSHOT</current.version>
+    <current.version>0.2.0</current.version>
     <java.version>1.8</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
