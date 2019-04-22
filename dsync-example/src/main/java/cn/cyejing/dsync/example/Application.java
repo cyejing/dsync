@@ -1,6 +1,8 @@
 package cn.cyejing.dsync.example;
 
 import cn.cyejing.dsync.toolkit.DLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,6 +20,7 @@ public class Application {
 
     @Service
     public class LockService {
+        Logger log = LoggerFactory.getLogger(LockService.class);
 
         @Autowired
         private DLock dLock;
@@ -26,8 +29,17 @@ public class Application {
 
         public void lockExample() {
             dLock.lock("adder");
-            i++;
-            dLock.unlock();
+            try {
+                dLock.lock("adder1");
+                //Do Something
+                int temp = i;
+                Thread.sleep(10);
+                i = temp + i;
+            } catch (Exception e) {
+                log.error("error", e);
+            } finally {
+                dLock.unlock();
+            }
         }
     }
 }

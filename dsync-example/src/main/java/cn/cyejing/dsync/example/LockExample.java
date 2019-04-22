@@ -20,8 +20,12 @@ public class LockExample {
 
         try {
             lock.lock("adder1");
-            i++;
+            int temp = i;
+            Thread.sleep(10);
+            i = temp + i;
             //Do Something
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             lock.unlock();
         }
