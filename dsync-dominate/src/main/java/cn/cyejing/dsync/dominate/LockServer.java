@@ -14,6 +14,9 @@ import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Born
  */
@@ -25,8 +28,14 @@ public class LockServer {
 
     public static void main(String[] args) throws InterruptedException {
         int port = 4843;
-        if (args.length > 0) {
-            port = Integer.parseInt(args[0]);
+        List<String> argList = new ArrayList<>();
+        for (int i = 0; i < args.length; i++) {
+            if (!args[i].startsWith("--")) {
+                argList.add(args[i]);
+            }
+        }
+        if (argList.size() > 0) {
+            port = Integer.parseInt(argList.get(0));
         }
         LockServer lockServer = new LockServer();
         lockServer.start(port);
