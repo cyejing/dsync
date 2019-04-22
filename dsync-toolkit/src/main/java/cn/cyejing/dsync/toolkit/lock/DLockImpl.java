@@ -6,17 +6,14 @@ import cn.cyejing.dsync.common.model.ResponseCode;
 import cn.cyejing.dsync.common.model.Steps;
 import cn.cyejing.dsync.toolkit.Config;
 import cn.cyejing.dsync.toolkit.DLock;
-import io.netty.channel.ChannelFuture;
-import java.util.concurrent.ConcurrentHashMap;
+import lombok.extern.slf4j.Slf4j;
+
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
- *
  * @author Born
  */
 @Slf4j
@@ -68,7 +65,7 @@ public class DLockImpl implements DLock {
     }
 
     @Override
-    public void lock(String resource) {
+    public void lock(String resource, Duration duration) {
         log.debug("lock resource:{}", resource);
         long processId = syncGetProcessId();
         if (threadLocal.get() != null) {
@@ -81,7 +78,7 @@ public class DLockImpl implements DLock {
         threadLocal.set(request);
         ResponseFuture responseFuture = client.request(request);
         try {
-            responseFuture.get();
+            responseFuture.get(duration);
             log.debug("get lock resource:{}", resource);
             if (this.processId == 0) {
                 log.warn("channel is inactive, try connect...");
@@ -96,18 +93,24 @@ public class DLockImpl implements DLock {
     }
 
     @Override
+    public void lock(String resource) {
+        lock(resource, Duration.ofSeconds(10));
+    }
+
+
+    @Override
     public void unlock() {
         Request request = threadLocal.get();
         if (request == null) {
             log.warn("don't repeat unlock");
             return;
         }
-        try{
+        try {
             request.setOperate(Steps.Unlock);
             log.debug("unlock request:{}", request);
 
             client.unlock(request);
-        }finally {
+        } finally {
             threadLocal.remove();
         }
     }

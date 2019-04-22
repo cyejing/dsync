@@ -2,6 +2,8 @@ package cn.cyejing.dsync.toolkit.lock;
 
 import cn.cyejing.dsync.common.model.Request;
 import cn.cyejing.dsync.common.model.Response;
+
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ResponseFuture {
-
 
     private final Request request;
 
@@ -23,7 +24,11 @@ public class ResponseFuture {
     }
 
     public Response get() throws InterruptedException {
-        boolean await = latch.await(10, TimeUnit.SECONDS);//TODO config
+        return get(Duration.ofSeconds(10));//TODO config
+    }
+
+    public Response get(Duration duration) throws InterruptedException {
+        boolean await = latch.await(duration.toNanos(), TimeUnit.NANOSECONDS);
         if (await == false) {
             log.error("wait lock timeout");
             throw new RuntimeException("wait lock timeout!");
