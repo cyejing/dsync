@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -87,7 +89,7 @@ public class DLockImpl implements DLock {
                 lock(resource); // recycle lock ,waiting server...
             }
         } catch (InterruptedException e) {
-            threadLocal.remove();
+            unlock();
             log.error("lock is interrupted", e);
             throw new RuntimeException(e);
         }
@@ -100,10 +102,14 @@ public class DLockImpl implements DLock {
             log.warn("don't repeat unlock");
             return;
         }
-        request.setOperate(Steps.Unlock);
-        threadLocal.remove();
-        log.debug("unlock request:{}", request);
-        client.unlock(request);
+        try{
+            request.setOperate(Steps.Unlock);
+            log.debug("unlock request:{}", request);
+
+            client.unlock(request);
+        }finally {
+            threadLocal.remove();
+        }
     }
 
     @Override

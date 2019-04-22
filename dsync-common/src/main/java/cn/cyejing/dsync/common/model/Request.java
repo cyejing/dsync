@@ -1,6 +1,8 @@
 package cn.cyejing.dsync.common.model;
 
 import java.io.Serializable;
+import java.util.concurrent.locks.ReentrantLock;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
