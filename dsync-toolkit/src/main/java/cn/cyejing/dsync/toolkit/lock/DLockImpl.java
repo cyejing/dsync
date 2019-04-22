@@ -50,7 +50,7 @@ public class DLockImpl implements DLock {
 
         try {
             Response response = responseFuture.get();
-            log.debug("try lock resource is:{}", response);
+            log.info("try lock resource is:{}", response);
             if (this.processId == 0) {
                 log.warn("channel is inactive, try connect...");
                 threadLocal.remove();
@@ -76,10 +76,11 @@ public class DLockImpl implements DLock {
 
         Request request = new Request(processId, lockId, Steps.Lock, resource);
         threadLocal.set(request);
+        log.info("try get lock request:{}", request);
         ResponseFuture responseFuture = client.request(request);
         try {
             responseFuture.get(duration);
-            log.debug("get lock resource:{}", resource);
+            log.info("get lock request:{}", request);
             if (this.processId == 0) {
                 log.warn("channel is inactive, try connect...");
                 threadLocal.remove();
@@ -107,8 +108,7 @@ public class DLockImpl implements DLock {
         }
         try {
             request.setOperate(Steps.Unlock);
-            log.debug("unlock request:{}", request);
-
+            log.info("unlock request:{}", request);
             client.unlock(request);
         } finally {
             threadLocal.remove();
