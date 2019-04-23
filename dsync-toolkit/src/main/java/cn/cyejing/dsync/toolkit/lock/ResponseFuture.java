@@ -3,6 +3,7 @@ package cn.cyejing.dsync.toolkit.lock;
 import cn.cyejing.dsync.common.model.Request;
 import cn.cyejing.dsync.common.model.Response;
 
+import cn.cyejing.dsync.toolkit.exception.LockTimeoutException;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +32,7 @@ public class ResponseFuture {
         boolean await = latch.await(duration.toNanos(), TimeUnit.NANOSECONDS);
         if (await == false) {
             log.error("wait lock timeout");
-            throw new RuntimeException("wait lock timeout!");
+            throw new LockTimeoutException("wait lock timeout!");
         }
         return response;
     }

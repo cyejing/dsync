@@ -136,10 +136,12 @@ public class DLockImpl implements DLock {
         try {
             if (this.processId == 0) {
                 log.debug("waiting for server response process  id");
-                boolean await = initProcessLatch.await(10, TimeUnit.SECONDS);
-                if (await == false) {
-                    throw new RuntimeException("wait lock server timeout, check server status");
-                }
+                initProcessLatch.await();
+//                boolean await = initProcessLatch.await(10, TimeUnit.SECONDS);
+//                if (await == false) {
+//                    log.error("wait lock server timeout, check server status");
+//                    throw new RuntimeException("wait lock server timeout, check server status");
+//                }
             }
         } catch (InterruptedException e) {
             log.error("waiting for process  is interrupted", e);
