@@ -6,6 +6,7 @@ import cn.cyejing.dsync.common.model.ResponseCode;
 import cn.cyejing.dsync.common.model.Steps;
 import cn.cyejing.dsync.toolkit.Config;
 import cn.cyejing.dsync.toolkit.DLock;
+import cn.cyejing.dsync.toolkit.exception.LockTimeoutException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
@@ -45,11 +46,11 @@ public class DLockImpl implements DLock {
         long lockId = createLockId();
 
         Request request = new Request(processId, lockId, Steps.TryLock, resource);
-        threadLocal.set(request);
         ResponseFuture responseFuture = client.request(request);
 
         try {
             Response response = responseFuture.get();
+            threadLocal.set(request);
             log.info("try lock resource is:{}", response);
             if (this.processId == 0) {
                 log.warn("channel is inactive, try connect...");
@@ -57,9 +58,9 @@ public class DLockImpl implements DLock {
                 return false;
             }
             return ResponseCode.Ok.equals(response.getCode());
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             threadLocal.remove();
-            log.error("lock is interrupted", e);
+            log.error("try lock resume error", e);
             throw new RuntimeException(e);
         }
     }
@@ -73,23 +74,35 @@ public class DLockImpl implements DLock {
         }
         long lockId = createLockId();
 
-
         Request request = new Request(processId, lockId, Steps.Lock, resource);
-        threadLocal.set(request);
         log.info("try get lock request:{}", request);
         ResponseFuture responseFuture = client.request(request);
         try {
             responseFuture.get(duration);
+            threadLocal.set(request);
             log.info("get lock request:{}", request);
             if (this.processId == 0) {
                 log.warn("channel is inactive, try connect...");
                 threadLocal.remove();
                 lock(resource); // recycle lock ,waiting server...
             }
-        } catch (InterruptedException e) {
-            unlock();
-            log.error("lock is interrupted", e);
+        } catch (LockTimeoutException e) {
+            unlock(request);
+            throw e;
+        } catch (Exception e) {
+            unlock(request);
+            log.error("lock resume error", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private void unlock(Request request) {
+        try {
+            request.setOperate(Steps.Unlock);
+            log.info("unlock request:{}", request);
+            client.unlock(request);
+        } finally {
+            threadLocal.remove();
         }
     }
 
@@ -103,16 +116,10 @@ public class DLockImpl implements DLock {
     public void unlock() {
         Request request = threadLocal.get();
         if (request == null) {
-            log.warn("don't repeat unlock");
+            log.debug("is repeat unlock");
             return;
         }
-        try {
-            request.setOperate(Steps.Unlock);
-            log.info("unlock request:{}", request);
-            client.unlock(request);
-        } finally {
-            threadLocal.remove();
-        }
+       unlock(request);
     }
 
     @Override
@@ -143,7 +150,7 @@ public class DLockImpl implements DLock {
 //                    throw new RuntimeException("wait lock server timeout, check server status");
 //                }
             }
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             log.error("waiting for process  is interrupted", e);
             throw new RuntimeException(e);
         }

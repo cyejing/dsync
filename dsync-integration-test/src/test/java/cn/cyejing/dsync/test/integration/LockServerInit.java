@@ -8,21 +8,17 @@ import org.junit.Before;
  */
 public class LockServerInit {
 
-    @Before
-    public void startServer() throws InterruptedException {
+    public void startServer(int port) throws InterruptedException {
         LockServer lockServer = new LockServer();
         new Thread(() -> {
             try {
-                lockServer.start(getPort());
+                lockServer.start(port);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
     }
 
-    public int getPort() {
-        return 4843;
-    }
 
 
 }

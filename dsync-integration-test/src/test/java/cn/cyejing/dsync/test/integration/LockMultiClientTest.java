@@ -21,12 +21,6 @@ import org.junit.Test;
 public class LockMultiClientTest extends LockServerInit {
 
     private int i = 0;
-    private int port = 4844;
-
-    @Override
-    public int getPort() {
-        return port;
-    }
 
     ExecutorService executorService = Executors.newFixedThreadPool(10);
     ExecutorService executorService2 = Executors.newFixedThreadPool(10, new MyThreadFactory("shoutdown"));
@@ -35,9 +29,10 @@ public class LockMultiClientTest extends LockServerInit {
 
     @Test
     public void testLock() throws Exception {
-        DLock lock = DSync.create(new Config().host("localhost").port(port)).getLock();
+        startServer(4844);
+        DLock lock = DSync.create(new Config().host("localhost").port(4844)).getLock();
 
-        DLock lock2 = DSync.create(new Config().host("localhost").port(port)).getLock();
+        DLock lock2 = DSync.create(new Config().host("localhost").port(4844)).getLock();
 
         /**
          * 5c 1000n 3462ms
@@ -66,7 +61,6 @@ public class LockMultiClientTest extends LockServerInit {
                     i = temp + 1;
 
                     latch1.countDown();
-                    lock.unlock();
                     if (latch1.getCount() == 50) { //开启第2个
                         log.info("begin2 1:{}, 2:{}, 3,{}", latch1.getCount(), latch2.getCount(), latch3.getCount());
                         for (int m = 0; m < count2; m++) {
@@ -78,10 +72,9 @@ public class LockMultiClientTest extends LockServerInit {
                                     i = temp1 + 1;
 
                                     latch2.countDown();
-                                    lock2.unlock();
                                     if (latch2.getCount() == 50) { //开启第3个
                                         log.info("begin3 1:{}, 2:{}, 3,{}", latch1.getCount(), latch2.getCount(), latch3.getCount());
-                                        DLock lock3 = DSync.create(new Config().host("localhost").port(port)).getLock();
+                                        DLock lock3 = DSync.create(new Config().host("localhost").port(4844)).getLock();
                                         for (int k = 0; k < count3; k++) {
                                             executorService3.submit(() -> {
                                                 try {
@@ -91,7 +84,6 @@ public class LockMultiClientTest extends LockServerInit {
                                                     i = temp2 + 1;
 
                                                     latch3.countDown();
-                                                    lock3.unlock();
                                                     if (latch3.getCount() == 0) {
                                                         log.info("shutdown3 1:{}, 2:{}, 3,{}", latch1.getCount(), latch2.getCount(), latch3.getCount());
 
@@ -99,6 +91,9 @@ public class LockMultiClientTest extends LockServerInit {
                                                     }
                                                 } catch (Exception e) {
                                                     e.printStackTrace();
+                                                }finally {
+                                                    lock3.unlock();
+
                                                 }
                                             });
                                         }
@@ -109,12 +104,17 @@ public class LockMultiClientTest extends LockServerInit {
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
+                                }finally {
+                                    lock2.unlock();
+
                                 }
                             });
                         }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                }finally {
+                    lock.unlock();
                 }
             });
         }

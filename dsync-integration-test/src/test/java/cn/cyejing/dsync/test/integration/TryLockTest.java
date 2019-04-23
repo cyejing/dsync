@@ -21,18 +21,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TryLockTest extends LockServerInit {
 
     private int i = 0;
-    private int port = 4846;
 
-    @Override
-    public int getPort() {
-        return port;
-    }
     ExecutorService executorService = Executors.newFixedThreadPool(10);
-
 
     @Test
     public void testLock() throws Exception {
-        DSync dSync = DSync.create(new Config().host("localhost").port(port));
+        startServer(4848);
+        DSync dSync = DSync.create(new Config().host("localhost").port(4848));
         DLock lock = dSync.getLock();
         /**
          * 5c 1000n 3462ms
@@ -56,12 +51,14 @@ public class TryLockTest extends LockServerInit {
                         i = temp + 1;
                         ai.incrementAndGet();
                     }
-                    lock.unlock();
                     latch.countDown();
                     Thread.sleep(new Random().nextInt(3)+1*100);
 
                 } catch (Exception e) {
                     e.printStackTrace();
+                }finally {
+                    lock.unlock();
+
                 }
 
             });
@@ -76,8 +73,8 @@ public class TryLockTest extends LockServerInit {
     private volatile int ii = 0;
     @Test
     public void testStep() throws InterruptedException {
-
-        DSync dSync = DSync.create(new Config().host("localhost").port(port));
+        startServer(4849);
+        DSync dSync = DSync.create(new Config().host("localhost").port(4849));
         DLock lock = dSync.getLock();
 
         CountDownLatch latch = new CountDownLatch(1);
@@ -96,11 +93,13 @@ public class TryLockTest extends LockServerInit {
                 ii = temp + 1;
                 System.out.println("lock1,await" + temp);
 
-                lock.unlock();
                 latch3.countDown();
 
             } catch (Exception e) {
                 e.printStackTrace();
+            }finally {
+                lock.unlock();
+
             }
         }).start();
         new Thread(() -> {
@@ -111,10 +110,12 @@ public class TryLockTest extends LockServerInit {
                 if (!lock1) {
                     System.out.println("lock failed");
                 }
-                lock.unlock();
                 latch3.countDown();
             } catch (Exception e) {
                 e.printStackTrace();
+            }finally {
+                lock.unlock();
+
             }
         }).start();
 

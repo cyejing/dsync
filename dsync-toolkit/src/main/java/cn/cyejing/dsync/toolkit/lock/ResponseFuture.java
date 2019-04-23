@@ -31,8 +31,9 @@ public class ResponseFuture {
     public Response get(Duration duration) throws InterruptedException {
         boolean await = latch.await(duration.toNanos(), TimeUnit.NANOSECONDS);
         if (await == false) {
-            log.error("wait lock timeout");
-            throw new LockTimeoutException("wait lock timeout!");
+            String msg = "wait lock:[" + request + "] timeout:" + duration.getSeconds() + "s";
+            log.error(msg);
+            throw new LockTimeoutException(msg);
         }
         return response;
     }

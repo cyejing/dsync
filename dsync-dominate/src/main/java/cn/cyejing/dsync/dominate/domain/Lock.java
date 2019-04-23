@@ -24,8 +24,12 @@ public class Lock {
     }
 
     public synchronized Operate release(Operate operate) {
+        if (operate == null) {
+            log.error("error of operate");
+            return null;
+        }
         if (currentOperate == null || !currentOperate.equals(operate)) {
-            log.warn("error that should not happen! currentOperate:{},operate:{}", currentOperate, operate);
+            queueWaiter.remove(operate);
             return null;
         }
         if (queueWaiter.isEmpty()) {

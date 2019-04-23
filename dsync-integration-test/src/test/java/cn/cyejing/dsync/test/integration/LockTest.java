@@ -3,6 +3,8 @@ package cn.cyejing.dsync.test.integration;
 import cn.cyejing.dsync.toolkit.Config;
 import cn.cyejing.dsync.toolkit.DLock;
 import cn.cyejing.dsync.toolkit.DSync;
+import cn.cyejing.dsync.toolkit.exception.LockTimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -20,17 +22,11 @@ public class LockTest extends LockServerInit {
 
     private int i = 0;
 
-    ExecutorService executorService = Executors.newFixedThreadPool(10);
-    private int port = 4845;
-
-    @Override
-    public int getPort() {
-        return port;
-    }
-
     @Test
     public void testLock() throws Exception {
-        DLock lock = DSync.create(new Config().host("localhost").port(port)).getLock();
+        startServer(4885);
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        DLock lock = DSync.create(new Config().host("localhost").port(4885)).getLock();
         /**
          * 5c 1000n 3462ms
          * 10c 1000n 3536ms
@@ -47,9 +43,10 @@ public class LockTest extends LockServerInit {
                     int temp = i;
                     Thread.sleep(10);
                     i = temp + 1;
-                    lock.unlock();
                 } catch (Exception e) {
                     e.printStackTrace();
+                }finally {
+                    lock.unlock();
                 }
             });
         }
@@ -64,9 +61,9 @@ public class LockTest extends LockServerInit {
 
     @Test
     public void testStep() throws InterruptedException {
+        startServer(4886);
 
-        DSync dSync = DSync.create(new Config().host("localhost").port(port));
-        DLock lock = dSync.getLock();
+        DLock lock = DSync.create(new Config().host("localhost").port(4886)).getLock();
 
         CountDownLatch latch = new CountDownLatch(1);
         CountDownLatch latch1 = new CountDownLatch(1);
@@ -83,11 +80,12 @@ public class LockTest extends LockServerInit {
                 ii = temp + 1;
                 System.out.println("lock1,await" + temp);
 
-                lock.unlock();
                 latch3.countDown();
 
             } catch (Exception e) {
                 e.printStackTrace();
+            }finally {
+                lock.unlock();
             }
         }).start();
         new Thread(() -> {
@@ -101,10 +99,11 @@ public class LockTest extends LockServerInit {
                 ii = temp + 1;
                 System.out.println("lock2,await" + temp);
 
-                lock.unlock();
                 latch3.countDown();
             } catch (Exception e) {
                 e.printStackTrace();
+            }finally {
+                lock.unlock();
             }
         }).start();
 
